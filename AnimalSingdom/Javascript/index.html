@@ -1,0 +1,201 @@
+<!doctype html>
+<html>
+
+<head>
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <title>AVPRG Aufgabe 5</title>
+</head>
+
+<body>
+    Grundeinstellungen
+    <div id="mainsettingsContainer">
+        <input type="range" min="0" max="100" value="50" class="slider" id="bpmSlider">
+        <span id="bpmOutput">50</span>
+        <div id="reverbContainer">Ort
+            <select id="reverbselectList">
+                <option value="none">None</option>
+                <option value="church">Kirche</option>
+                <option value="garage">Garage</option>
+                <option value="room">Raum</option>
+                <option value="cave">Höhle</option>
+            </select>
+        </div>
+    </div>
+    Grundbeat wählen
+    <div id="mainBeatContainer"> 
+        <div class="mainbeat"> Klanghölzer
+            <div id="klangholzbox" class="box1">
+                <div class="box1Upper">
+                    <button id="klangholzbutton1">1</button>
+                    <button id="klangholzbutton2">2</button>
+                    <button id="klangholzbutton3">3</button>
+                    <button id="klangholzbutton4">4</button>
+                </div>
+                <div class="box1Lower">
+                    <button id="klangholzbutton5">5</button>
+                    <button id="klangholzbutton6">6</button>
+                    <button id="klangholzbutton7">7</button>
+                    <button id="klangholzbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="mainbeat"> Glocken
+            <div id="glockenbox" class="box1">
+                <div class="box1Upper">
+                    <button id="glockenbutton1">1</button>
+                    <button id="glockenbutton2">2</button>
+                    <button id="glockenbutton3">3</button>
+                    <button id="glockenbutton4">4</button>
+                </div>
+                <div class="box1Lower">
+                    <button id="glockenbutton5">5</button>
+                    <button id="glockenbutton6">6</button>
+                    <button id="glockenbutton7">7</button>
+                    <button id="glockenbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="mainbeat"> Trillerpfeife
+            <div id="trillerpfeifebox" class="box1">
+                <div class="box1Upper">
+                    <button id="trillerpfeife1">1</button>
+                    <button id="trillerpfeife2">2</button>
+                    <button id="trillerpfeife3">3</button>
+                    <button id="trillerpfeife4">4</button>
+                </div>
+                <div class="box1Lower">
+                    <button id="trillerpfeife5">5</button>
+                    <button id="trillerpfeife6">6</button>
+                    <button id="trillerpfeife7">7</button>
+                    <button id="trillerpfeife8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="mainbeat"> Klatschen
+            <div id="klatschbox" class="box1">
+                <div class="box1Upper">
+                    <button id="klatschbutton1">1</button>
+                    <button id="klatschbutton2">2</button>
+                    <button id="klatschbutton3">3</button>
+                    <button id="klatschbutton4">4</button>
+                </div>
+                <div class="box1Lower">
+                    <button id="klatschbutton5">5</button>
+                    <button id="klatschbutton6">6</button>
+                    <button id="klatschbutton7">7</button>
+                    <button id="klatschbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="mainbeat"> Stampfen
+            <div id="stampfbox" class="box1">
+                <div class="box1Upper">
+                    <button id="stampfbutton1">1</button>
+                    <button id="stampfbutton2">2</button>
+                    <button id="stampfbutton3">3</button>
+                    <button id="stampfbutton4">4</button>
+                </div>
+                <div class="box1Lower">
+                    <button id="stampfbutton5">5</button>
+                    <button id="stampfbutton6">6</button>
+                    <button id="stampfbutton7">7</button>
+                    <button id="stampfbutton8">8</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    Tiere
+    <div id="animalContainer">
+        <div class="animalbeat"> Katze
+            <div id="catbox" class="box2">
+                <div class="gainSliderBox">
+                    Lautstärke
+                    <input type="range" min="0" max="100" value="50" class="slider" id="catGainSlider">
+                    <span id="gainCatOutput">50</span>
+                </div>
+                <div class="box2Upper">
+                    <button id="catbutton1">1</button>
+                    <button id="catbutton2">2</button>
+                    <button id="catbutton3">3</button>
+                    <button id="catbutton4">4</button>
+                </div>
+                <div class="box2Lower">
+                    <button id="catbutton5">5</button>
+                    <button id="catbutton6">6</button>
+                    <button id="catbutton7">7</button>
+                    <button id="catbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="animalbeat"> Elefant
+            <div id="elephantbox" class="box2">
+                <div class="gainSliderBox">
+                    Lautstärke
+                    <input type="range" min="0" max="100" value="50" class="slider" id="elephantGainSlider">
+                    <span id="gainElephantOutput">50</span>
+                </div>
+                <div class="box2Upper">
+                    <button id="elephantbutton1">1</button>
+                    <button id="elephantbutton2">2</button>
+                    <button id="elephantbutton3">3</button>
+                    <button id="elephantbutton4">4</button>
+                </div>
+                <div class="box2Lower">
+                    <button id="elephantbutton5">5</button>
+                    <button id="elephantbutton6">6</button>
+                    <button id="elephantbutton7">7</button>
+                    <button id="elephantbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="animalbeat"> Löwe
+            <div id="lionbox" class="box2">
+                <div class="gainSliderBox">
+                    Lautstärke
+                    <input type="range" min="0" max="100" value="50" class="slider" id="lionGainSlider">
+                    <span id="gainLionOutput">50</span>
+                </div>
+                <div class="box2Upper">
+                    <button id="lionbutton1">1</button>
+                    <button id="lionbutton2">2</button>
+                    <button id="lionbutton3">3</button>
+                    <button id="lionbutton4">4</button>
+                </div>
+                <div class="box2Lower">
+                    <button id="lionbutton5">5</button>
+                    <button id="lionbutton6">6</button>
+                    <button id="lionbutton7">7</button>
+                    <button id="lionbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        <div class="animalbeat"> Schwein
+            <div id="pigbox" class="box2">
+                <div class="gainSliderBox">
+                    Lautstärke
+                    <input type="range" min="0" max="100" value="50" class="slider" id="pigGainSlider">
+                    <span id="gainPigOutput">50</span>
+                </div>
+                <div class="box2Upper">
+                    <button id="pigbutton1">1</button>
+                    <button id="pigbutton2">2</button>
+                    <button id="pigbutton3">3</button>
+                    <button id="pigbutton4">4</button>
+                </div>
+                <div class="box2Lower">
+                    <button id="pigbutton5">5</button>
+                    <button id="pigbutton6">6</button>
+                    <button id="pigbutton7">7</button>
+                    <button id="pigbutton8">8</button>
+                </div>
+            </div>
+        </div>
+        
+    </div>
+    <!-- <script src="reverb.js"></script> -->
+    <!--------------------------------------->
+</body>
+
+</html>
