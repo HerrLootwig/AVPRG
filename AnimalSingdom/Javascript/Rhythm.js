@@ -55,16 +55,31 @@ function playBeat() {
             playSound(audioBuffers[i], time + i * eighthNoteTime,false)
         }      
     }
+
+    console.log(context.currentTime);
+    console.log(time + 7 *eighthNoteTime)
+
+    //wait(time + 7 *eighthNoteTime);
 }
 
 function addSound(name,pos) {
-    fetch("/sounds/sound" + name + ".wav")
+    fetch("/Javascript/sounds/sound" + name + ".wav")
         .then(response => response.arrayBuffer())
         .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
         .then(audioBuffer => {
             audioBuffers[pos] = audioBuffer;
     })
     .catch(console.error);
+}
+
+function wait(time){
+    timePassed = false;
+    while(!timePassed){
+        if(context.currentTime > time){
+            timePassed = true;
+            playBeat();
+        }
+    }
 }
 
 document.querySelector("#playResetButton").addEventListener("click", function(e) {
