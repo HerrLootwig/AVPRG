@@ -7,13 +7,13 @@ pixel = [55,49,100]
 hp = 176
 sp = 130
 
-elephant = [151,170,185] #rgba(185,170,151,255)
-elephantH = 16
-elephantS = 46
+elephant = [133,136,130] #rgba(130,136,133,255)
+elephantH = 75
+elephantS = 11
 
-lion = [1,170,237] #rgba(237,170,1,255)
-lionH = 21
-lionS = 253
+lion = [106,149,158] #rgba(158,149,106,255)
+lionH = 24
+lionS = 83
 
 pig = [200,223,255] #rgba(255,223,200,255)
 pigH = 12
@@ -23,7 +23,7 @@ cat = [13,12,16] #rgba(16,12,13,255)
 catH = 172
 catS = 63
 
-threshold = 0
+threshold = 5
 
 def nothing(x):
     pass
@@ -39,21 +39,27 @@ def lookForElephant(frame):
 
     return mask
 
+def lookForLion(frame):
+    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    h,s,v = cv2.split(hsv)
+    huemask = cv2.inRange(h, lionH - threshold, lionH + threshold)
+    satmask = cv2.inRange(s, lionS - threshold, lionS + threshold)
+
+    mask = huemask
+    cv2.bitwise_and(huemask,satmask,mask)
+
+    return mask
+
 windowName = "Video"
 cv2.namedWindow(windowName)
-cv2.createTrackbar("slider",windowName, 0,100, nothing)
 
 
 
 while cap.isOpened():
 
-    j = cv2.getTrackbarPos('slider',windowName)
-
-    threshold = j
-
     ret, frame = cap.read()
     
-    mask = lookForElephant(frame)
+    mask = lookForLion(frame)
 
     median = cv2.medianBlur(mask,5)
 
@@ -65,9 +71,6 @@ while cap.isOpened():
 
 cap.release()
 cv2.destroyAllWindows()
-
-def lookForLion():
-    nothing()
 
 def lookForPig():
     nothing()
