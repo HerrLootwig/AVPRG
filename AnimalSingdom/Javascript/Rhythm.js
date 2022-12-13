@@ -14,31 +14,12 @@ function setInitialSounds() {
 setInitialSounds();
 console.log(audioBuffers);
 
-/*for (let i = 0; i < 3; i++)
-    getAudioData(i);
-
-function getAudioData(i) {
-    fetch("/sounds/sound" + (i + 1) + ".wav")
-        .then(response => response.arrayBuffer())
-        .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
-        .then(audioBuffer => {
-            audioBuffers[i] = audioBuffer;
-    })
-    .catch(console.error);
-}*/
-
-function playSound(buffer, time, lastOne) {
+function playSound(buffer, time) {
     console.log(buffer);
     let source = context.createBufferSource();
     source.buffer = buffer;
     source.connect(context.destination);
     source.start(time);
-    if(lastOne){
-        source.onended = function(){
-            playBeat();
-            console.log("Play!");
-        }
-    }
 }
 
 function playBeat() {
@@ -49,17 +30,10 @@ function playBeat() {
     let time = startTime //+ ( 8 * eighthNoteTime);
     console.log(audioBuffers);
     for (i = 0; i<audioBuffers.length; i++){
-        if(i==audioBuffers.length-1){
-            playSound(audioBuffers[i], time + i * eighthNoteTime,true)
-        }else{
-            playSound(audioBuffers[i], time + i * eighthNoteTime,false)
-        }      
+        playSound(audioBuffers[i], time + i * eighthNoteTime)    
     }
 
-    console.log(context.currentTime);
-    console.log(time + 7 *eighthNoteTime)
-
-    //wait(time + 7 *eighthNoteTime);
+    setTimeout(playBeat,2650);
 }
 
 function addSound(name,pos) {
@@ -70,16 +44,6 @@ function addSound(name,pos) {
             audioBuffers[pos] = audioBuffer;
     })
     .catch(console.error);
-}
-
-function wait(time){
-    timePassed = false;
-    while(!timePassed){
-        if(context.currentTime > time){
-            timePassed = true;
-            playBeat();
-        }
-    }
 }
 
 document.querySelector("#playResetButton").addEventListener("click", function(e) {
