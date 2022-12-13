@@ -1,18 +1,41 @@
+let animals = [false,false,false,false]
+
+if(navigator.requestMIDIAccess) {
+    navigator.requestMIDIAccess({sysex: false}).then(function (midiAccess) {
+        midi = midiAccess;
+        var inputs = midi.inputs.values();
+        for (var input = inputs.next(); input && !input.done; input = inputs.next()) {
+            input.value.onmidimessage = onMididMessage;
+        }       
+    });
+}else{
+    alert("No MIDI support in your browser.")
+}
+
+function onMididMessage(event) {
+    switch (event.data[0]) {
+        case 3:
+            animal[2] = true;
+            break;
+    }
+}
+
 let context = new AudioContext();
 var audioBuffers = [];
 let isPlaying = false;
 
 function setInitialSounds() {
     for (let i = 0; i<8; i++){
-        if (i == 3 || i == 7){
-            addSound("1",i);
-        } else {
-            audioBuffers[i] = null;
-        }    
+        audioBuffers[i] = null;  
     }
 }
+
 setInitialSounds();
 console.log(audioBuffers);
+document.getElementById("catbox").style.display = "none";
+document.getElementById("elephantbox").style.display = "none";
+document.getElementById("lionbox").style.display = "none";
+document.getElementById("pigbox").style.display = "none";
 
 function playSound(buffer, time) {
     console.log(buffer);
@@ -34,6 +57,27 @@ function playBeat() {
     }
 
     setTimeout(playBeat,2650);
+}
+
+function addAnimal(){
+    for (i = 0; i<animals.length; i++){
+        if(animal[i]){
+            switch(i){
+                case 0:
+                    document.getElementById("catbox").style.display = "display";
+                    break;
+                case 1:
+                    document.getElementById("elephantbox").style.display = "display";
+                    break;
+                case 2:
+                    document.getElementById("lionbox").style.display = "display";
+                    break;
+                case 3:
+                    document.getElementById("pigbox").style.display = "display";
+                    break;    
+            }
+        }   
+    }
 }
 
 function addSound(name,pos) {

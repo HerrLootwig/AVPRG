@@ -1,7 +1,10 @@
 import numpy as np
 import cv2
+import rtmidi
+import mido
 
 cap = cv2.VideoCapture(0)
+midiOutput = mido.open_output("LoopBe Internal MIDI 1")
 
 pixel = [55,49,100]
 hp = 176
@@ -47,6 +50,11 @@ def lookForLion(frame):
 
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
+
+    controller = 1
+    value = 3
+    message = mido.Message('animal_activated', controller,value)
+    midiOutput.send(message)
 
     return mask
 
