@@ -13,20 +13,24 @@ if(navigator.requestMIDIAccess) {
 }
 
 function onMididMessage(event) {
-    switch (event.data[0]) {
+    console.log("Nachricht erhalten: "+event.data);
+    switch (event.data[2]) {
         case 3:
-            animal[2] = true;
+            animals[2] = true;
+            document.getElementById("lionbox").style.display = "block";
             break;
     }
 }
 
 let context = new AudioContext();
 var audioBuffers = [];
+var animalBuffers = []
 let isPlaying = false;
 
 function setInitialSounds() {
     for (let i = 0; i<8; i++){
         audioBuffers[i] = null;  
+        animalBuffers[i] = null;
     }
 }
 
@@ -56,28 +60,11 @@ function playBeat() {
         playSound(audioBuffers[i], time + i * eighthNoteTime)    
     }
 
-    setTimeout(playBeat,2650);
-}
-
-function addAnimal(){
-    for (i = 0; i<animals.length; i++){
-        if(animal[i]){
-            switch(i){
-                case 0:
-                    document.getElementById("catbox").style.display = "display";
-                    break;
-                case 1:
-                    document.getElementById("elephantbox").style.display = "display";
-                    break;
-                case 2:
-                    document.getElementById("lionbox").style.display = "display";
-                    break;
-                case 3:
-                    document.getElementById("pigbox").style.display = "display";
-                    break;    
-            }
-        }   
+    for (i = 0; i<animalBuffers.length; i++){
+        playSound(animalBuffers[i], time + i * eighthNoteTime)    
     }
+
+    setTimeout(playBeat,2650);
 }
 
 function addSound(name,pos) {
@@ -86,6 +73,16 @@ function addSound(name,pos) {
         .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
         .then(audioBuffer => {
             audioBuffers[pos] = audioBuffer;
+    })
+    .catch(console.error);
+}
+
+function addAnimalSound(name,pos) {
+    fetch("/Javascript/sounds/sound" + name + ".wav")
+        .then(response => response.arrayBuffer())
+        .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
+        .then(audioBuffer => {
+            animalBuffers[pos] = audioBuffer;
     })
     .catch(console.error);
 }
@@ -297,6 +294,46 @@ document.querySelector("#stampfbutton7").addEventListener("click", function(e) {
 
 document.querySelector("#stampfbutton8").addEventListener("click", function(e) {
     addSound("5",7);
+    
+});
+
+document.querySelector("#lionbutton1").addEventListener("click", function(e) {
+    addAnimalSound("Lion",0)
+    
+});
+
+document.querySelector("#lionbutton2").addEventListener("click", function(e) {
+    addAnimalSound("Lion",1)
+    
+});
+
+document.querySelector("#lionbutton3").addEventListener("click", function(e) {
+    addAnimalSound("Lion",2)
+    
+});
+
+document.querySelector("#lionbutton4").addEventListener("click", function(e) {
+    addAnimalSound("Lion",3)
+    
+});
+
+document.querySelector("#lionbutton5").addEventListener("click", function(e) {
+    addAnimalSound("Lion",4)
+    
+});
+
+document.querySelector("#lionbutton6").addEventListener("click", function(e) {
+    addAnimalSound("Lion",5)
+    
+});
+
+document.querySelector("#lionbutton7").addEventListener("click", function(e) {
+    addAnimalSound("Lion",6)
+    
+});
+
+document.querySelector("#lionbutton8").addEventListener("click", function(e) {
+    addAnimalSound("Lion",7)
     
 });
 

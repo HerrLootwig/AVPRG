@@ -31,6 +31,10 @@ threshold = 5
 def nothing(x):
     pass
 
+def sendMessage(controller,value):
+    message = mido.Message('control_change', control = controller,value = value)
+    midiOutput.send(message)
+
 def lookForElephant(frame):
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -51,10 +55,13 @@ def lookForLion(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
-    controller = 1
-    value = 3
-    message = mido.Message('animal_activated', controller,value)
-    midiOutput.send(message)
+
+    if(np.sum(mask == 255) > 1000):
+        controller = 1
+        value = 3
+        sendMessage(controller,value)
+    
+    
 
     return mask
 
