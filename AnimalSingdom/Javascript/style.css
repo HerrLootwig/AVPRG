@@ -1,5 +1,19 @@
 html,body {
     text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 1em;
+    float: left;
+}
+
+button {
+    background-color: #88d3bb;
+    border: 0em;
+    border-radius: 4px;
+    margin-bottom: 0.15em;
+    font-size: 1.5em;
+}
+button:disabled{
+    background-color: #d3888d;
 }
 
 #mainBeatContainer {
@@ -14,6 +28,13 @@ html,body {
     width: 24%;
     border: 2px solid #8bdec4;
     float: left; /* add this */
+}
+.box1{
+    margin: 1em;
+}
+
+.box2{
+    margin: 1em;
 }
 .slider {
     margin: 0;
