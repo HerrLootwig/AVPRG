@@ -48,12 +48,12 @@ function setInitialSounds() {
 
 setInitialSounds();
 console.log(audioBuffers);
-/*
+
 document.getElementById("catbox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
-*/
+
 
 
 function playSound(buffer, time) {
@@ -120,6 +120,23 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
         isPlaying = true;
     } else {
         setInitialSounds();
+        reEnableButtons("beat1", '');
+        reEnableButtons("beat2", '');
+        reEnableButtons("beat3", '');
+        reEnableButtons("beat4", '');
+        reEnableButtons("beat5", '');
+        reEnableButtons("beat6", '');
+        reEnableButtons("beat7", '');
+        reEnableButtons("beat8", '');
+        reEnableButtons("animalbeat1", '');
+        reEnableButtons("animalbeat2", '');
+        reEnableButtons("animalbeat3", '');
+        reEnableButtons("animalbeat4", '');
+        reEnableButtons("animalbeat5", '');
+        reEnableButtons("animalbeat6", '');
+        reEnableButtons("animalbeat7", '');
+        reEnableButtons("animalbeat8", '');
+
     }
 
 });
@@ -374,44 +391,157 @@ document.querySelector("#bongobutton8").addEventListener("click", function (e) {
     reEnableButtons("beat8", "bongobutton8");
 });
 
+//Katze
+
+
+
+//Elefant
+
+document.querySelector("#elephantbutton1").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 0)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat1", "elephantbutton1");
+});
+
+document.querySelector("#elephantbutton2").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 1)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat2", "elephantbutton2");
+});
+
+document.querySelector("#elephantbutton3").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 2)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat3", "elephantbutton3");
+});
+
+document.querySelector("#elephantbutton4").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 3)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat4", "elephantbutton4");
+});
+
+document.querySelector("#elephantbutton5").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 4)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat5", "elephantbutton5");
+});
+
+document.querySelector("#elephantbutton6").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 5)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat6", "elephantbutton6");
+});
+
+document.querySelector("#elephantbutton7").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 6)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat7", "elephantbutton7");
+});
+
+document.querySelector("#elephantbutton8").addEventListener("click", function (e) {
+    addAnimalSound("Elephant", 7)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat8", "elephantbutton8");
+});
+
+//Löwe
+
 document.querySelector("#lionbutton1").addEventListener("click", function (e) {
     addAnimalSound("Lion", 0)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat1", "lionbutton1");
 });
 
 document.querySelector("#lionbutton2").addEventListener("click", function (e) {
     addAnimalSound("Lion", 1)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat2", "lionbutton2");
 });
 
 document.querySelector("#lionbutton3").addEventListener("click", function (e) {
     addAnimalSound("Lion", 2)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat3", "lionbutton3");
 });
 
 document.querySelector("#lionbutton4").addEventListener("click", function (e) {
     addAnimalSound("Lion", 3)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat4", "lionbutton4");
 });
 
 document.querySelector("#lionbutton5").addEventListener("click", function (e) {
     addAnimalSound("Lion", 4)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat5", "lionbutton5");
 });
 
 document.querySelector("#lionbutton6").addEventListener("click", function (e) {
     addAnimalSound("Lion", 5)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat6", "lionbutton6");
 });
 
 document.querySelector("#lionbutton7").addEventListener("click", function (e) {
     addAnimalSound("Lion", 6)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat7", "lionbutton7");
 });
 
 document.querySelector("#lionbutton8").addEventListener("click", function (e) {
     addAnimalSound("Lion", 7)
-
+    e.target.disabled = true;
+    reEnableButtons("animalbeat8", "lionbutton8");
 });
 
 
+// Schwein
+
+document.querySelector("#pigbutton1").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 0)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat1", "pigbutton1");
+});
+
+document.querySelector("#pigbutton2").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 1)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat2", "pigbutton2");
+});
+
+document.querySelector("#pigbutton3").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 2)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat3", "pigbutton3");
+});
+
+document.querySelector("#pigbutton4").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 3)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat4", "pigbutton4");
+});
+
+document.querySelector("#pigbutton5").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 4)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat5", "pigbutton5");
+});
+
+document.querySelector("#pigbutton6").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 5)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat6", "pigbutton6");
+});
+
+document.querySelector("#pigbutton7").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 6)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat7", "pigbutton7");
+});
+
+document.querySelector("#pigbutton8").addEventListener("click", function (e) {
+    addAnimalSound("Pig", 7)
+    e.target.disabled = true;
+    reEnableButtons("animalbeat8", "pigbutton8");
+});
