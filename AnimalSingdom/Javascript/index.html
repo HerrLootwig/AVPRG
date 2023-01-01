@@ -9,11 +9,14 @@
 <body>
     <h1>Animal Singdom - Die Tönenden Tiere</h1>
     <div><button id="playResetButton">Play Beat</button></div>
-    Grundeinstellungen
+    
     <div id="mainsettingsContainer">
+        <h2>Grundeinstellungen</h2>
         <input type="range" min="0" max="100" value="50" class="slider" id="bpmSlider">
+        <br />
         <span id="bpmOutput">50 bpm</span>
-        <div id="reverbContainer">Ort
+        <div id="reverbContainer">
+            <h4>Ort auswählen: </h4>
             <select id="reverbselectList">
                 <option value="none">None</option>
                 <option value="church">Kirche</option>
@@ -23,9 +26,10 @@
             </select>
         </div>
     </div>
-    Grundbeat wählen
-    <div id="mainBeatContainer"> 
-        <div class="mainbeat"> Klanghölzer
+    <h3>Grundbeat wählen</h3>
+    <div class="flex-container" id="mainBeatContainer"> 
+        <div class="mainbeat"> 
+            <h4>Klanghölzer</h4>
             <div id="klangholzbox" class="box1">
                 <div class="box1Upper">
                     <button class="beat1" id="klangholzbutton1">1</button>
@@ -41,7 +45,8 @@
                 </div>
             </div>
         </div>
-        <div class="mainbeat"> Glocken
+        <div class="mainbeat"> 
+            <h4>Glocken</h4>
             <div id="glockenbox" class="box1">
                 <div class="box1Upper">
                     <button class="beat1" id="glockenbutton1">1</button>
@@ -57,7 +62,8 @@
                 </div>
             </div>
         </div>
-        <div class="mainbeat"> Guiro
+        <div class="mainbeat"> 
+            <h4>Guiro</h4>
             <div id="guirobox" class="box1">
                 <div class="box1Upper">
                     <button class="beat1" id="guirobutton1">1</button>
@@ -73,7 +79,8 @@
                 </div>
             </div>
         </div>
-        <div class="mainbeat"> Klatschen
+        <div class="mainbeat"> 
+            <h4>Klatschen</h4>
             <div id="klatschbox" class="box1">
                 <div class="box1Upper">
                     <button class="beat1" id="klatschbutton1">1</button>
@@ -89,7 +96,8 @@
                 </div>
             </div>
         </div>
-        <div class="mainbeat"> Bongo
+        <div class="mainbeat"> 
+            <h4>Bongo</h4>
             <div id="bongobox" class="box1">
                 <div class="box1Upper">
                     <button class="beat1" id="bongobutton1">1</button>
@@ -108,12 +116,13 @@
 
     </div>
 
-    Tiere
-    <div id="animalContainer">
-        <div class="animalbeat"> Katze
+    <h3>Tiere</h3>
+    <div class="flex-container" id="animalContainer">
+        <div class="animalbeat"> 
+            <h4>Katze</h4>
             <div id="catbox" class="box2">
                 <div class="gainSliderBox">
-                    Lautstärke
+                    <p>Lautstärke</p>
                     <input type="range" min="0" max="100" value="50" class="slider" id="catGainSlider">
                     <span id="gainCatOutput">50</span>
                 </div>
@@ -131,10 +140,11 @@
                 </div>
             </div>
         </div>
-        <div class="animalbeat"> Elefant
+        <div class="animalbeat"> 
+            <h4>Elefant</h4>
             <div id="elephantbox" class="box2">
                 <div class="gainSliderBox">
-                    Lautstärke
+                    <p>Lautstärke</p>
                     <input type="range" min="0" max="100" value="50" class="slider" id="elephantGainSlider">
                     <span id="gainElephantOutput">50</span>
                 </div>
@@ -152,10 +162,11 @@
                 </div>
             </div>
         </div>
-        <div class="animalbeat"> Löwe
+        <div class="animalbeat"> 
+            <h4>Löwe</h4>
             <div id="lionbox" class="box2">
                 <div class="gainSliderBox">
-                    Lautstärke
+                    <p>Lautstärke</p>
                     <input type="range" min="0" max="100" value="50" class="slider" id="lionGainSlider">
                     <span id="gainLionOutput">50</span>
                 </div>
@@ -173,10 +184,11 @@
                 </div>
             </div>
         </div>
-        <div class="animalbeat"> Schwein
+        <div class="animalbeat"> 
+            <h4>Schwein</h4>
             <div id="pigbox" class="box2">
                 <div class="gainSliderBox">
-                    Lautstärke
+                    <p>Lautstärke</p>
                     <input type="range" min="0" max="100" value="50" class="slider" id="pigGainSlider">
                     <span id="gainPigOutput">50</span>
                 </div>
