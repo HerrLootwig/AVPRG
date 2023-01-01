@@ -16,11 +16,11 @@ function onMididMessage(event) {
     console.log("Nachricht erhalten: " + event.data);
     switch (event.data[2]) {
         case 1:
-            animals[2] = true;
+            animals[0] = true;
             document.getElementById("catbox").style.display = "block";
             break;
         case 2:
-            animals[2] = true;
+            animals[1] = true;
             document.getElementById("elephantbox").style.display = "block";
             break;
         case 3:
@@ -28,7 +28,7 @@ function onMididMessage(event) {
             document.getElementById("lionbox").style.display = "block";
             break;
         case 4:
-            animals[2] = true;
+            animals[3] = true;
             document.getElementById("pigbox").style.display = "block";
             break;
     }
