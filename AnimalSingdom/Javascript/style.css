@@ -6,7 +6,7 @@ html,body {
     
 }
 body{
-    background-repeat: no-repeat;
+    
     background-image: url("/Javascript/background.jpg");
     background-size: cover; 
 }

@@ -3,7 +3,7 @@ import cv2
 import rtmidi
 import mido
 
-cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(1)
 midiOutput = mido.open_output("LoopBe Internal MIDI 1")
 
 pixel = [55,49,100]
@@ -127,7 +127,7 @@ while cap.isOpened():
 
     mask = frame
     
-    mask = lookForCat(colorfgmask)
+    mask = lookForLion(colorfgmask)
 
     median = cv2.medianBlur(mask,5)
 

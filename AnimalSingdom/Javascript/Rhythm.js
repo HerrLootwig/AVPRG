@@ -48,12 +48,12 @@ function setInitialSounds() {
 
 setInitialSounds();
 console.log(audioBuffers);
-
+/*
 document.getElementById("catbox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
-
+*/
 
 
 function playSound(buffer, time) {
