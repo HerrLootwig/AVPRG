@@ -52,6 +52,7 @@ button:disabled{
     border: 2px solid #6da896;
     background-color:  #ffffffe4;
     margin-top:0.15em;
+    margin-bottom:0.15em;
 }
 
 .box1{
@@ -62,9 +63,13 @@ button:disabled{
     margin: 1em;
 }
 
-#mainsettingsContainer {
+#mainContainer {
     border: 2px solid #6da896;
     background-color:  #ffffffe4;
+    margin-top:1.5em;
+    margin-right:1em;
+    margin-left:1em;
+    margin-bottom:1.5em;
 } 
 
 select {

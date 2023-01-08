@@ -1,4 +1,4 @@
-let animals = [false, false, false, false]
+let animals = [false, false, false, false] // wird das für irgendwas gebraucht???
 
 if (navigator.requestMIDIAccess) {
     navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
@@ -42,25 +42,28 @@ let isPlaying = false;
 function setInitialSounds() {
     for (let i = 0; i < 8; i++) {
         audioBuffers[i] = null;
-        animalBuffers[i] = null;
+        animalBuffers[i] = {sound: null, gain:null, animal:null};
     }
 }
 
 setInitialSounds();
 console.log(audioBuffers);
-
+console.log(animalBuffers);
+/*
 document.getElementById("catbox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
+*/
 
 
-
-function playSound(buffer, time) {
+function playSound(buffer, time, gainValue) {
     console.log(buffer);
     let source = context.createBufferSource();
+    let gain = context.createGain();
+    gain.gain.value = gainValue;
     source.buffer = buffer;
-    source.connect(context.destination);
+    source.connect(gain).connect(context.destination);
     source.start(time);
 }
 
@@ -72,11 +75,11 @@ function playBeat() {
     let time = startTime //+ ( 8 * eighthNoteTime);
     console.log(audioBuffers);
     for (i = 0; i < audioBuffers.length; i++) {
-        playSound(audioBuffers[i], time + i * eighthNoteTime)
+        playSound(audioBuffers[i], time + i * eighthNoteTime, 1)
     }
 
     for (i = 0; i < animalBuffers.length; i++) {
-        playSound(animalBuffers[i], time + i * eighthNoteTime)
+        playSound(animalBuffers[i].sound, time + i * eighthNoteTime, animalBuffers[i].gain)
     }
 
     setTimeout(playBeat, 2650);
@@ -92,14 +95,26 @@ function addSound(name, pos) {
         .catch(console.error);
 }
 
-function addAnimalSound(name, pos) {
+function addAnimalSound(name, pos, gain) {
     fetch("/Javascript/sounds/sound" + name + ".wav")
         .then(response => response.arrayBuffer())
         .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
         .then(audioBuffer => {
-            animalBuffers[pos] = audioBuffer;
+            animalBuffers[pos].sound = audioBuffer;
+            animalBuffers[pos].animal = name;
+            animalBuffers[pos].gain = gain;
+            console.log(animalBuffers);
         })
         .catch(console.error);
+}
+
+function updateAnimalGain(animalname, newGain) {
+    for (let i = 0; i < animalBuffers.length; i++) {
+        if(animalBuffers[i].animal == animalname){
+            animalBuffers[i].gain = newGain;
+            console.log(animalBuffers);
+        }
+    }
 }
 
 function reEnableButtons(classNumber, x) {
@@ -241,7 +256,7 @@ document.querySelector("#glockenbutton8").addEventListener("click", function (e)
 });
 
 
-//
+// Guiro
 
 document.querySelector("#guirobutton1").addEventListener("click", function (e) {
     addSound("3", 0);
@@ -391,106 +406,138 @@ document.querySelector("#bongobutton8").addEventListener("click", function (e) {
     reEnableButtons("beat8", "bongobutton8");
 });
 
+// ------------------------------------Tiere-----------------------------------------------
+
 //Katze
 
 
 
 //Elefant
+document.querySelector("#elephantGainSlider").addEventListener("input", function(e){
+    let gainValue = (this.value / 100);
+    document.querySelector("#gainElephantOutput").innerHTML = this.value + "%";
+    updateAnimalGain("Elephant", gainValue);
+    
+});
+
 
 document.querySelector("#elephantbutton1").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 0)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 0, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat1", "elephantbutton1");
 });
 
 document.querySelector("#elephantbutton2").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 1)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 1, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat2", "elephantbutton2");
 });
 
 document.querySelector("#elephantbutton3").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 2)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 2, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat3", "elephantbutton3");
 });
 
 document.querySelector("#elephantbutton4").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 3)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 3, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat4", "elephantbutton4");
 });
 
 document.querySelector("#elephantbutton5").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 4)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 4, gainValue)
     e.target.disabled = true;
     reEnableButtons("animalbeat5", "elephantbutton5");
 });
 
 document.querySelector("#elephantbutton6").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 5)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 5, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat6", "elephantbutton6");
 });
 
 document.querySelector("#elephantbutton7").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 6)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 6, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat7", "elephantbutton7");
 });
 
 document.querySelector("#elephantbutton8").addEventListener("click", function (e) {
-    addAnimalSound("Elephant", 7)
+    gainValue = document.querySelector("#elephantGainSlider").value / 100;
+    addAnimalSound("Elephant", 7, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat8", "elephantbutton8");
 });
 
 //Löwe
 
+document.querySelector("#lionGainSlider").addEventListener("input", function(e){
+    let gainValue = (this.value / 100);
+    document.querySelector("#gainLionOutput").innerHTML = this.value + "%";
+    updateAnimalGain("Lion", gainValue);
+    
+});
+
 document.querySelector("#lionbutton1").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 0)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 0, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat1", "lionbutton1");
 });
 
 document.querySelector("#lionbutton2").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 1)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 1, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat2", "lionbutton2");
 });
 
 document.querySelector("#lionbutton3").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 2)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 2, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat3", "lionbutton3");
 });
 
 document.querySelector("#lionbutton4").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 3)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 3, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat4", "lionbutton4");
 });
 
 document.querySelector("#lionbutton5").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 4)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 4, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat5", "lionbutton5");
 });
 
 document.querySelector("#lionbutton6").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 5)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 5, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat6", "lionbutton6");
 });
 
 document.querySelector("#lionbutton7").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 6)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 6, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat7", "lionbutton7");
 });
 
 document.querySelector("#lionbutton8").addEventListener("click", function (e) {
-    addAnimalSound("Lion", 7)
+    gainValue = document.querySelector("#lionGainSlider").value / 100;
+    addAnimalSound("Lion", 7, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat8", "lionbutton8");
 });
@@ -498,50 +545,65 @@ document.querySelector("#lionbutton8").addEventListener("click", function (e) {
 
 // Schwein
 
+document.querySelector("#pigGainSlider").addEventListener("input", function(e){
+    let gainValue = (this.value / 100);
+    document.querySelector("#gainPigOutput").innerHTML = this.value + "%";
+    updateAnimalGain("Pig", gainValue);
+    
+});
+
 document.querySelector("#pigbutton1").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 0)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 0, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat1", "pigbutton1");
 });
 
 document.querySelector("#pigbutton2").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 1)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 1, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat2", "pigbutton2");
 });
 
 document.querySelector("#pigbutton3").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 2)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 2, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat3", "pigbutton3");
 });
 
 document.querySelector("#pigbutton4").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 3)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 3, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat4", "pigbutton4");
 });
 
 document.querySelector("#pigbutton5").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 4)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 4, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat5", "pigbutton5");
 });
 
 document.querySelector("#pigbutton6").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 5)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 5, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat6", "pigbutton6");
 });
 
 document.querySelector("#pigbutton7").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 6)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 6, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat7", "pigbutton7");
 });
 
 document.querySelector("#pigbutton8").addEventListener("click", function (e) {
-    addAnimalSound("Pig", 7)
+    gainValue = document.querySelector("#pigGainSlider").value / 100;
+    addAnimalSound("Pig", 7, gainValue);
     e.target.disabled = true;
     reEnableButtons("animalbeat8", "pigbutton8");
 });
