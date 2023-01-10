@@ -35,14 +35,17 @@ function onMididMessage(event) {
 }
 
 let context = new AudioContext();
+let convolver = context.createConvolver();
+let convolverActive = false;
 var audioBuffers = [];
 var animalBuffers = []
 let isPlaying = false;
 
 function setInitialSounds() {
+    convolverActive = false;
     for (let i = 0; i < 8; i++) {
         audioBuffers[i] = null;
-        animalBuffers[i] = {sound: null, gain:null, animal:null};
+        animalBuffers[i] = { sound: null, gain: null, animal: null };
     }
 }
 
@@ -55,15 +58,47 @@ document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
 */
+function loadImpulseResponse(name) {
+    if (name == "none") {
+        convolver.disconnect();
+        convolverActive = false;
+    } else {
+        fetch("/Javascript/impulseResponses/" + name + ".wav")
+            .then(response => response.arrayBuffer())
+            .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
+            .then(audioBuffer => {
+                convolverActive = true;
+                if (convolver) { convolver.disconnect(); }
 
+                convolver = context.createConvolver();
+                convolver.buffer = audioBuffer;
+                convolver.normalize = true;
+
+            })
+            .catch(console.error);
+    }
+}
 
 function playSound(buffer, time, gainValue) {
     console.log(buffer);
     let source = context.createBufferSource();
     let gain = context.createGain();
     gain.gain.value = gainValue;
+
     source.buffer = buffer;
-    source.connect(gain).connect(context.destination);
+
+    if (convolverActive) {
+        console.log(convolver)
+        source.connect(gain)
+        gain.connect(convolver);
+        // hier zwischen kommt der Stereopanner, also vor den convolver
+        convolver.connect(context.destination);
+
+    }else {
+        source.connect(gain)
+        gain.connect(context.destination);
+    }
+
     source.start(time);
 }
 
@@ -110,7 +145,7 @@ function addAnimalSound(name, pos, gain) {
 
 function updateAnimalGain(animalname, newGain) {
     for (let i = 0; i < animalBuffers.length; i++) {
-        if(animalBuffers[i].animal == animalname){
+        if (animalBuffers[i].animal == animalname) {
             animalBuffers[i].gain = newGain;
             console.log(animalBuffers);
         }
@@ -151,9 +186,17 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
         reEnableButtons("animalbeat6", '');
         reEnableButtons("animalbeat7", '');
         reEnableButtons("animalbeat8", '');
-
+        document.querySelector("#reverbSelectList").value = 'none';
     }
 
+});
+
+// Reverb Selectlist
+
+document.querySelector("#reverbSelectList").addEventListener("change", function (e) {
+    let name = e.target.options[e.target.selectedIndex].value;
+    console.log(name);
+    loadImpulseResponse(name);
 });
 
 // Klanghölzer
@@ -413,11 +456,11 @@ document.querySelector("#bongobutton8").addEventListener("click", function (e) {
 
 
 //Elefant
-document.querySelector("#elephantGainSlider").addEventListener("input", function(e){
+document.querySelector("#elephantGainSlider").addEventListener("input", function (e) {
     let gainValue = (this.value / 100);
     document.querySelector("#gainElephantOutput").innerHTML = this.value + "%";
     updateAnimalGain("Elephant", gainValue);
-    
+
 });
 
 
@@ -479,11 +522,11 @@ document.querySelector("#elephantbutton8").addEventListener("click", function (e
 
 //Löwe
 
-document.querySelector("#lionGainSlider").addEventListener("input", function(e){
+document.querySelector("#lionGainSlider").addEventListener("input", function (e) {
     let gainValue = (this.value / 100);
     document.querySelector("#gainLionOutput").innerHTML = this.value + "%";
     updateAnimalGain("Lion", gainValue);
-    
+
 });
 
 document.querySelector("#lionbutton1").addEventListener("click", function (e) {
@@ -545,11 +588,11 @@ document.querySelector("#lionbutton8").addEventListener("click", function (e) {
 
 // Schwein
 
-document.querySelector("#pigGainSlider").addEventListener("input", function(e){
+document.querySelector("#pigGainSlider").addEventListener("input", function (e) {
     let gainValue = (this.value / 100);
     document.querySelector("#gainPigOutput").innerHTML = this.value + "%";
     updateAnimalGain("Pig", gainValue);
-    
+
 });
 
 document.querySelector("#pigbutton1").addEventListener("click", function (e) {
