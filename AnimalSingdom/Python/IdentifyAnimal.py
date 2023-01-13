@@ -10,23 +10,23 @@ pixel = [55,49,100]
 hp = 176
 sp = 130
 
-elephant = [112,122,120] #rgba(120,122,112,255)
-elephantH = 36
-elephantS = 20
+elephant = [128,142,140] #rgba(140,142,128,255)
+elephantH = 34
+elephantS = 25
 
-lion = [102,177,196] #rgba(196,177,102,255)
+lion = [95,203,227] #rgba(227,203,95,255)
 lionH = 24
-lionS = 122
+lionS = 148
 
-pig = [168,183,192] #rgba(192,183,168,255)
-pigH = 18
-pigS = 31
+pig = [191,227,255] #rgba(255,227,191,255)
+pigH = 16
+pigS = 64
 
-cat = [46,44,44] #rgba(44,44,46,255)
-catH = 120
-catS = 11
+cat = [17,16,13] #rgba(13,19,17,255)
+catH = 80#36
+catS = 80#63
 
-threshold = 5
+threshold = 10
 
 backSub = cv2.createBackgroundSubtractorKNN()
 
@@ -38,6 +38,7 @@ def sendMessage(controller,value):
     midiOutput.send(message)
 
 def lookForElephant(frame):
+    threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, elephantH - threshold, elephantH + threshold)
@@ -54,6 +55,7 @@ def lookForElephant(frame):
     return mask
 
 def lookForLion(frame):
+    threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, lionH - threshold, lionH + threshold)
@@ -73,6 +75,7 @@ def lookForLion(frame):
     return mask
 
 def lookForPig(frame):
+    threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, pigH - threshold, pigH + threshold)
@@ -92,6 +95,7 @@ def lookForPig(frame):
     return mask
 
 def lookForCat(frame):
+    threshold = 5
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, catH - threshold, catH + threshold)
@@ -125,11 +129,18 @@ while cap.isOpened():
     whitePixels = (colorfgmask > 0)
     colorfgmask[whitePixels] = frame[whitePixels]
 
-    mask = frame
+    #mask = frame
     
-    mask = lookForLion(colorfgmask)
+    #mask = lookForLion(frame)
 
-    median = cv2.medianBlur(mask,5)
+    median = cv2.medianBlur(frame,3)
+
+    maskCat = lookForCat(median)
+    maskPig = lookForPig(median)
+    maskElephant = lookForElephant(median)
+    maskLion = lookForLion(median)
+
+    mask = maskElephant + maskCat + maskLion + maskPig
 
     cv2.imshow(windowName,mask)
     cv2.imshow("LiveFootage",frame)
