@@ -31,7 +31,25 @@ function onMididMessage(event) {
             animals[3] = true;
             document.getElementById("pigbox").style.display = "block";
             break;
+        case 5:
+            document.getElementById("catbox").style.display = "none";
+            break;
+        case 6:
+            document.getElementById("elephantbox").style.display = "none";
+            break;
+        case 7:
+            document.getElementById("lionbox").style.display = "none";
+            break;
+        case 8:
+            document.getElementById("pigbox").style.display = "none";
+            break;
+            
     }
+}
+
+function sendMessage(midiAccess, portID, msg) {
+    const output = midiAccess.outputs.get(portID);
+    output.send(msg);
 }
 
 let context = new AudioContext();
@@ -190,6 +208,17 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
     }
 
 });
+
+//Kalibrierung
+
+document.querySelector('#calibrationButton').addEventListener("click", function (e) {
+    navigator.requestMIDIAccess().then((midiAccess) => {
+        //const outputs = midiAccess.outputs.values();
+        const outputs = Array.from(midiAccess.outputs.values());
+        console.log(outputs)
+        sendMessage(midiAccess,"output-1",[[0x90, 0x3C, 0x80]])
+    })
+})
 
 // Reverb Selectlist
 
