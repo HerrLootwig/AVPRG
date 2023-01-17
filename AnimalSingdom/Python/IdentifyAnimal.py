@@ -3,37 +3,55 @@ import cv2
 import rtmidi
 import mido
 
+#Video-Input
 cap = cv2.VideoCapture(0)
+
+#Midi-Output
 midiOutput = mido.open_output("LoopBe Internal MIDI 1")
+
+#Programm mit Kalibrierung starten?
 calibrate = True
-key = ""
 
-pixel = [55,49,100]
-hp = 176
-sp = 130
-
-elephant = [128,142,140] #rgba(140,142,128,255)
+#Initialisierung der Hue- und Saturation-Werte
 elephantH = 0#34
 elephantS = 0#25
 
-lion = [95,203,227] #rgba(227,203,95,255)
 lionH = 0#24
 lionS = 0#148
 
-pig = [191,227,255] #rgba(255,227,191,255)
 pigH = 0#16
 pigS = 0#64
 
-cat = [17,16,13] #rgba(13,19,17,255)
 catH = 0#80#36
 catS = 0#80#63
 
-threshold = 10
+#Videofenster
+windowName = "Video"
+cv2.namedWindow(windowName)
 
-backSub = cv2.createBackgroundSubtractorKNN()
+#Zeithilfen für die Kalibrierung 
+countdown = 10
+wait = 30 #30 frames = 1 sek
 
+#Bool-Werte für die Kalibrierung
+calBack = False
+calLion = False
+calElephant = False
+calPig = False
+calCat = False
 
+#Größe des Kamerabildes
+area = [480,640]
+
+#Initialisierung der Darstellung der kalibrierten Pixelfarbe im Video
+screencap = np.zeros((100,100,3), np.uint8)
+
+#Diese Funktion stellt einen Text in der Video-Ausgabe dar.
+#text: Datzustellender Text
+#img: Bild, auf dem der Text dargestellt werden soll
+#pos: Position des Textes auf dem Bild
 def putText(text,img,pos):
+
     font                   = cv2.FONT_HERSHEY_SIMPLEX
     position               = pos
     fontScale              = 1
@@ -49,15 +67,20 @@ def putText(text,img,pos):
         thickness,
         lineType)
 
+#Diese Funktion merkt sich die Pixelfarben eines Bereiches in der Bildmitte und berechnet deren durchschnittlichen Farbwert, 
+#um die Hue- und Saturation-Werte für das spätere Erkennen eines Tieres zu speichern.
+#animal: Welches Tier wird gerade kalibriert?
+#frame: Bild des Tieres
 def initCalibration(animal,frame):
 
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    pixel = [240,320]
-    roi = hsv[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10]
-    #roi = cv2.cvtColor(roi, cv2.COLOR_HSV2BGR)
+    pixel = [240,320] #Mittleres Pixel 
+    roi = hsv[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10] #Bildauschnitt von Interesse (Dargestellt im Video durch ein Kreuz)
     hSum = 0
     sSum = 0
     vSum = 0
+
+    #Berechnung des Durchschnitts:
     for x in range(20):
         for y in range(20):
             hSum = hSum + roi[y,x][0]
@@ -69,6 +92,7 @@ def initCalibration(animal,frame):
     v = vSum/len(hsv)
     average = [int(h),int(s),int(v)]
 
+    #Zuweisung der Werte, je nachdem welches Tier kalibriert wird:
     if(animal == 1):
         global lionH
         global lionS
@@ -90,6 +114,7 @@ def initCalibration(animal,frame):
         catS = average[0]
         catH = average[1]
 
+    #Bereitstellung des Farbwerts als Array zur weiteren Verwendung:
     pixel = np.zeros((1,1,3), np.uint8)
     pixel = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)
     pixel[0,0] = average
@@ -99,28 +124,39 @@ def initCalibration(animal,frame):
     
     return pixel
 
+#Diese Funktion liefert das aktuelle Bild ohne den Hintergrund
+#frame: Aktuelles Kamerabild
 def backgroundSubstraction(frame):
+
+    #Freistellen des Objekts:
     gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-    gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR) #Dieser Schritt ist nötig, um das Graustufenbild (weniger Dimensionen) mit dem Farbbild verrechnen zu können
     absDiff = cv2.absdiff(gray, frame)
     thresh = 40
     ret, mask = cv2.threshold(absDiff, thresh, 255, cv2.THRESH_BINARY)
+    cv2.imshow("Test",absDiff)
 
+    #Ein grüner Hintergund wird hinzugefügt, um ihn besser von den Tieren unterscheiden zu können
     newBackground = np.zeros((frame.shape[0],frame.shape[1],3), np.uint8)
     newBackground[:] = [0,255,0]
     whitePixels = (mask > 0)
     newBackground[whitePixels] = frame[whitePixels]
-    cv2.imshow("Kombination", newBackground) 
+    #cv2.imshow("Kombination", newBackground) 
     return newBackground
 
-def nothing(x):
-    pass
-
+#Diese Funktion sendet eine MIDI-Nachricht über den internen Midi-Port.
+#controller: MIDI-Controller
+#value: Zu sendender Wert (verwendet wird der Bereich 1 bis 8 und in Rhythm.js paarweise einem Tier zugeordnet)
 def sendMessage(controller,value):
+
     message = mido.Message('control_change', control = controller,value = value)
     midiOutput.send(message)
 
+#Diese Funktion untersucht das Bild auf die Farben des Elefanten.
+#frame: Aktuelles Kamerabild
 def lookForElephant(frame):
+    
+    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
     threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -130,6 +166,7 @@ def lookForElephant(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
+    #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 500):
         controller = 1
         value = 2
@@ -141,7 +178,11 @@ def lookForElephant(frame):
 
     return mask
 
+#Diese Funktion untersucht das Bild auf die Farben des Löwen.
+#frame: Aktuelles Kamerabild
 def lookForLion(frame):
+
+    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
     threshold = 5
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -151,6 +192,7 @@ def lookForLion(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
+    #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 1000):
         controller = 1
         value = 3
@@ -162,7 +204,11 @@ def lookForLion(frame):
     
     return mask
 
+#Diese Funktion untersucht das Bild auf die Farben des Schweins.
+#frame: Aktuelles Kamerabild
 def lookForPig(frame):
+
+    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
     threshold = 3
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -172,6 +218,7 @@ def lookForPig(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
+    #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 1000):
         controller = 1
         value = 4
@@ -183,7 +230,11 @@ def lookForPig(frame):
 
     return mask
 
+#Diese Funktion untersucht das Bild auf die Farben der Katze.
+#frame: Aktuelles Kamerabild
 def lookForCat(frame):
+
+    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
     threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
@@ -193,6 +244,7 @@ def lookForCat(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
+    #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 1000):
         controller = 1
         value = 1
@@ -204,9 +256,11 @@ def lookForCat(frame):
     
     return mask
 
+#Diese Funktion zeichnet ein Kreuz in der Mitte des Kamerabildes, um den Benutzer beim Kalibrieren zu helfen.
+#frame: aktuelles Kamerabild
 def putCurser(frame):
-    #center = frame[int(frame.shape[1]/2)][int(frame.shape[0]/2)]
-    center = [240, 320]
+    center = [240, 320] #Mittelpunkt  des Bildes und des Kreuzes
+    #Kreuz zeichnen:
     for x in range(center[1] -10, center[1] + 10):
         frame[center[0]-1, x] = [0,0,0]
         frame[center[0], x] = [0,0,0]
@@ -216,31 +270,24 @@ def putCurser(frame):
         frame[y,center[1]] = [0,0,0]
         frame[y,center[1]+1] = [0,0,0]
 
-windowName = "Video"
-cv2.namedWindow(windowName)
-countdown = 10
-wait = 30
-calBack = False
-calLion = False
-calElephant = False
-calPig = False
-calCat = False
-pixelDemo = [0,0,0]
-area = [480,640]
-screencap = np.zeros((100,100,3), np.uint8)
-
+#Dauerschleife, bearbeitet jedes Kamerabild
 while cap.isOpened():
 
     ret, frame = cap.read()
 
+    #Ablauf der Kalibrierung
     if(calibrate):
 
+        #Anzeigekopie, auf der Text, Kreuz und Screencap dargestellt werden, da das Original für die Farbwerte gebraucht wird
         visual = frame.copy()
 
+        #Kreuz wird in Bildmitte gezeichnet
         putCurser(visual)
 
+        #Screencap (zuletzt kalibrierte Pixelfarbe) wird unten rechts angezeigt
         visual[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
 
+        #Reihenfolge der Schrifteinblendungen
         if(not calBack):
             putText("Kalibrierung: Hintergrund " + str(countdown), visual,(10,50))
         elif(not calLion):
@@ -252,41 +299,44 @@ while cap.isOpened():
         elif(not calCat):
             putText("Kalibrierung: Katze in " + str(countdown),visual,(10,50))
         elif(calCat):
+            #Sonderfall letztes Bild: Standbild, um kalibrierte Farbe der Katze sehen zu können
             visual = copy
             visual[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
+            #Eingabeaufforderung um fortzusetzen und zum Hauptteil des Programms überzugehen
             putText("Druecken Sie eine beliebige Taste.",visual,(10,100))
             cv2.imshow("LiveFootage",visual)
             cv2.waitKey(0)
             calibrate = False
 
-        if(countdown <= 0 and not calBack):
+        #Abarbeitung der einzelnen Kalibrierungschritte
+        if(countdown <= 0 and not calBack): #Hintergrund
             calBack = True
             countdown = 10
             background = frame.copy()
             visual[:] = [255,255,255]
             print("Blitz!")
-        elif(countdown <= 0 and not calLion):
+        elif(countdown <= 0 and not calLion): #Löwe
             color = initCalibration(1,frame)
             calLion = True
             countdown = 10
             screencap[:] = color 
             visual[:] = [255,255,255]
             print("Blitz!")
-        elif(countdown <= 0 and not calElephant):
+        elif(countdown <= 0 and not calElephant): #Elefant
             color = initCalibration(2,frame)
             calElephant = True
             countdown = 10
             screencap[:] = color 
             visual[:] = [255,255,255]
             print("Blitz!")
-        elif(countdown <= 0 and not calPig):
+        elif(countdown <= 0 and not calPig): #Schwein
             color = initCalibration(3,frame)
             calPig = True
             countdown = 10
             screencap[:] = color 
             visual[:] = [255,255,255]
             print("Blitz!")
-        elif(countdown <= 0 and not calCat):
+        elif(countdown <= 0 and not calCat): #Katze
             color = initCalibration(4,frame)
             calCat = True
             screencap[:] = color 
@@ -294,41 +344,40 @@ while cap.isOpened():
             visual[:] = [255,255,255]
             print("Blitz!")
 
+        #30 Frames abwarten um Countdown einen Schritt runterzuzählen
         if(wait <= 0):
             countdown = countdown - 1
             wait = 30
         wait = wait - 1
 
+        #Anzeigen
         cv2.imshow("LiveFootage",visual)
         print(lionH,lionS)
 
+    #Hauptteil des Programms - Tiere werden gescucht
     else:
 
-        #fgmask = backSub.apply(frame)
-        #colorfgmask = cv2.cvtColor(fgmask,cv2.COLOR_GRAY2BGR)
-
-        #whitePixels = (colorfgmask > 0)
-        #colorfgmask[whitePixels] = frame[whitePixels]
-
-        #mask = frame
-    
-        #mask = lookForLion(frame)
-
+        #Hintergrund entfernen
         bs = backgroundSubstraction(frame)
 
+        #Medianfilter anwenden
         median = cv2.medianBlur(bs,3)
 
+        #Nach Tieren suchen
         maskCat = lookForCat(median)
         maskPig = lookForPig(median)
         maskElephant = lookForElephant(median)
         maskLion = lookForLion(median)
 
+        #Alle Tiermasken kombinieren
         mask = maskElephant + maskCat + maskLion + maskPig
 
+        #Anzeigen und Texteinblendung
         putText("Zeigen Sie ihre Tiere!", frame,(10,50))
         cv2.imshow(windowName,mask)
         cv2.imshow("LiveFootage",frame)
 
+    #Mit Tastendruck Programm beenden
     if cv2.waitKey(25) != -1:
         break
 
