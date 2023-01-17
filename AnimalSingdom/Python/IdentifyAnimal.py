@@ -54,6 +54,7 @@ def initCalibration(animal,frame):
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     pixel = [240,320]
     roi = hsv[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10]
+    #roi = cv2.cvtColor(roi, cv2.COLOR_HSV2BGR)
     hSum = 0
     sSum = 0
     vSum = 0
@@ -66,18 +67,26 @@ def initCalibration(animal,frame):
     h = hSum/len(hsv)
     s = sSum/len(hsv)
     v = vSum/len(hsv)
-    average = [h,s,v]
+    average = [int(h),int(s),int(v)]
 
-    if(animal == "Lion"):
+    if(animal == 1):
+        global lionH
+        global lionS
         lionH = average[0]
         lionS = average[1]
-    elif(animal == "Elephant"):
+    elif(animal == 2):
+        global elephantH
+        global elephantS
         elephantH = average[0]
         elephantS = average[1]
-    elif(animal == "Pig"):
+    elif(animal == 3):
+        global pigH
+        global pigS
         pigH = average[0]
         pigS = average[1]
-    elif(animal == "Cat"):
+    elif(animal == 4):
+        global catH
+        global catS
         catS = average[0]
         catH = average[1]
 
@@ -86,10 +95,23 @@ def initCalibration(animal,frame):
     pixel[0,0] = average
     pixel = cv2.cvtColor(pixel, cv2.COLOR_HSV2BGR)
 
-    #frame[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10] = [0,0,255]
+    #frame[(pixel[0]-10):(pixel[0]+10), (pixel[1]-10):(pixel[1]+10)] = [0,0,255]
     
     return pixel
 
+def backgroundSubstraction(frame):
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    gray = cv2.cvtColor(gray, cv2.COLOR_GRAY2BGR)
+    absDiff = cv2.absdiff(gray, frame)
+    thresh = 40
+    ret, mask = cv2.threshold(absDiff, thresh, 255, cv2.THRESH_BINARY)
+
+    newBackground = np.zeros((frame.shape[0],frame.shape[1],3), np.uint8)
+    newBackground[:] = [0,255,0]
+    whitePixels = (mask > 0)
+    newBackground[whitePixels] = frame[whitePixels]
+    cv2.imshow("Kombination", newBackground) 
+    return newBackground
 
 def nothing(x):
     pass
@@ -99,7 +121,7 @@ def sendMessage(controller,value):
     midiOutput.send(message)
 
 def lookForElephant(frame):
-    threshold = 5
+    threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, elephantH - threshold, elephantH + threshold)
@@ -108,7 +130,7 @@ def lookForElephant(frame):
     mask = huemask
     cv2.bitwise_and(huemask,satmask,mask)
 
-    if(np.sum(mask == 255) > 1000):
+    if(np.sum(mask == 255) > 500):
         controller = 1
         value = 2
         sendMessage(controller,value)
@@ -141,7 +163,7 @@ def lookForLion(frame):
     return mask
 
 def lookForPig(frame):
-    threshold = 5
+    threshold = 3
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, pigH - threshold, pigH + threshold)
@@ -162,7 +184,7 @@ def lookForPig(frame):
     return mask
 
 def lookForCat(frame):
-    threshold = 5
+    threshold = 20
     hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     h,s,v = cv2.split(hsv)
     huemask = cv2.inRange(h, catH - threshold, catH + threshold)
@@ -198,6 +220,7 @@ windowName = "Video"
 cv2.namedWindow(windowName)
 countdown = 10
 wait = 30
+calBack = False
 calLion = False
 calElephant = False
 calPig = False
@@ -212,52 +235,63 @@ while cap.isOpened():
 
     if(calibrate):
 
-        putCurser(frame)
+        visual = frame.copy()
 
-        frame[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
+        putCurser(visual)
 
-        if(not calLion):
-            putText("Kalibrierung: Loewe in " + str(countdown),frame,(10,50))
-        if(calLion and not calElephant):
-            putText("Kalibrierung: Elefant in " + str(countdown),frame,(10,50))
-        if(calElephant and not calPig):
-            putText("Kalibrierung: Schwein in " + str(countdown),frame,(10,50))
-        if(calPig and not calCat):
-            putText("Kalibrierung: Katze in " + str(countdown),frame,(10,50))
-        if(calCat):
-            frame = copy
-            putText("Druecken Sie eine beliebige Taste.",frame,(10,100))
-            cv2.imshow("LiveFootage",frame)
+        visual[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
+
+        if(not calBack):
+            putText("Kalibrierung: Hintergrund " + str(countdown), visual,(10,50))
+        elif(not calLion):
+            putText("Kalibrierung: Loewe in " + str(countdown),visual,(10,50))
+        elif(not calElephant):
+            putText("Kalibrierung: Elefant in " + str(countdown),visual,(10,50))
+        elif(not calPig):
+            putText("Kalibrierung: Schwein in " + str(countdown),visual,(10,50))
+        elif(not calCat):
+            putText("Kalibrierung: Katze in " + str(countdown),visual,(10,50))
+        elif(calCat):
+            visual = copy
+            visual[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
+            putText("Druecken Sie eine beliebige Taste.",visual,(10,100))
+            cv2.imshow("LiveFootage",visual)
             cv2.waitKey(0)
             calibrate = False
 
-        if(countdown <= 0 and not calLion):
-            color = initCalibration("Lion",frame)
+        if(countdown <= 0 and not calBack):
+            calBack = True
+            countdown = 10
+            background = frame.copy()
+            visual[:] = [255,255,255]
+            print("Blitz!")
+        elif(countdown <= 0 and not calLion):
+            color = initCalibration(1,frame)
             calLion = True
             countdown = 10
             screencap[:] = color 
-            frame[:] = [255,255,255]
+            visual[:] = [255,255,255]
             print("Blitz!")
         elif(countdown <= 0 and not calElephant):
-            color = initCalibration("Elephant",frame)
+            color = initCalibration(2,frame)
             calElephant = True
             countdown = 10
             screencap[:] = color 
-            frame[:] = [255,255,255]
+            visual[:] = [255,255,255]
             print("Blitz!")
         elif(countdown <= 0 and not calPig):
-            color = initCalibration("Pig",frame)
+            color = initCalibration(3,frame)
             calPig = True
             countdown = 10
             screencap[:] = color 
-            frame[:] = [255,255,255]
+            visual[:] = [255,255,255]
             print("Blitz!")
         elif(countdown <= 0 and not calCat):
-            color = initCalibration("Cat",frame)
+            color = initCalibration(4,frame)
             calCat = True
             screencap[:] = color 
-            copy = frame.copy()
-            frame[:] = [255,255,255]
+            copy = visual.copy()
+            visual[:] = [255,255,255]
             print("Blitz!")
 
         if(wait <= 0):
@@ -265,21 +299,24 @@ while cap.isOpened():
             wait = 30
         wait = wait - 1
 
-        cv2.imshow("LiveFootage",frame)
+        cv2.imshow("LiveFootage",visual)
+        print(lionH,lionS)
 
     else:
 
-        fgmask = backSub.apply(frame)
-        colorfgmask = cv2.cvtColor(fgmask,cv2.COLOR_GRAY2BGR)
+        #fgmask = backSub.apply(frame)
+        #colorfgmask = cv2.cvtColor(fgmask,cv2.COLOR_GRAY2BGR)
 
-        whitePixels = (colorfgmask > 0)
-        colorfgmask[whitePixels] = frame[whitePixels]
+        #whitePixels = (colorfgmask > 0)
+        #colorfgmask[whitePixels] = frame[whitePixels]
 
         #mask = frame
     
         #mask = lookForLion(frame)
 
-        median = cv2.medianBlur(frame,3)
+        bs = backgroundSubstraction(frame)
+
+        median = cv2.medianBlur(bs,3)
 
         maskCat = lookForCat(median)
         maskPig = lookForPig(median)
