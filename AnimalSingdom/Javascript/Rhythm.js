@@ -43,7 +43,7 @@ function onMididMessage(event) {
         case 8:
             document.getElementById("pigbox").style.display = "none";
             break;
-            
+
     }
 }
 
@@ -58,6 +58,7 @@ let convolverActive = false;
 var audioBuffers = [];
 var animalBuffers = []
 let isPlaying = false;
+let tempo = 90;
 
 function setInitialSounds() {
     convolverActive = false;
@@ -112,7 +113,7 @@ function playSound(buffer, time, gainValue) {
         // hier zwischen kommt der Stereopanner, also vor den convolver
         convolver.connect(context.destination);
 
-    }else {
+    } else {
         source.connect(gain)
         gain.connect(context.destination);
     }
@@ -121,7 +122,7 @@ function playSound(buffer, time, gainValue) {
 }
 
 function playBeat() {
-    let tempo = 90; // BPM (beats per minute)
+    // tempo = bpm
     let eighthNoteTime = (60 / tempo) / 2;
     let startTime = context.currentTime;
 
@@ -135,7 +136,7 @@ function playBeat() {
         playSound(animalBuffers[i].sound, time + i * eighthNoteTime, animalBuffers[i].gain)
     }
 
-    setTimeout(playBeat, 2650);
+    setTimeout(playBeat, 238000 / tempo);
 }
 
 function addSound(name, pos) {
@@ -216,9 +217,17 @@ document.querySelector('#calibrationButton').addEventListener("click", function 
         //const outputs = midiAccess.outputs.values();
         const outputs = Array.from(midiAccess.outputs.values());
         console.log(outputs)
-        sendMessage(midiAccess,"output-1",[[0x90, 0x3C, 0x80]])
+        sendMessage(midiAccess, "output-1", [[0x90, 0x3C, 0x80]])
     })
 })
+
+// bpm slider
+
+document.querySelector("#bpmSlider").addEventListener("input", function (e) {
+    let bpmValue = this.value;
+    document.querySelector("#bpmOutput").innerHTML = bpmValue + " bpm";
+    tempo = bpmValue;
+});
 
 // Reverb Selectlist
 
