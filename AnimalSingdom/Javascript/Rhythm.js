@@ -102,20 +102,23 @@ function playSound(buffer, time, gainValue) {
     console.log(buffer);
     let source = context.createBufferSource();
     let gain = context.createGain();
-    gain.gain.value = gainValue;
+    let stereoPanner = context.createStereoPanner();
 
     source.buffer = buffer;
+    gain.gain.value = gainValue;
+    stereoPanner.pan.value=0;
 
     if (convolverActive) {
         console.log(convolver)
         source.connect(gain)
-        gain.connect(convolver);
-        // hier zwischen kommt der Stereopanner, also vor den convolver
+        gain.connect(stereoPanner);
+        stereoPanner.connect(convolver);
         convolver.connect(context.destination);
 
     } else {
         source.connect(gain)
-        gain.connect(context.destination);
+        gain.connect(stereoPanner);
+        stereoPanner.connect(context.destination);
     }
 
     source.start(time);
