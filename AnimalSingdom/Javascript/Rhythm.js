@@ -34,18 +34,22 @@ function onMididMessage(event) {
         case 5:
             document.getElementById("horsebox").style.display = "none";
             removeAnimal("Horse");
+            reEnableButtons("horsebutton", '');
             break;
         case 6:
             document.getElementById("elephantbox").style.display = "none";
             removeAnimal("Elephant");
+            reEnableButtons("elephantbutton", '');
             break;
         case 7:
             document.getElementById("lionbox").style.display = "none";
             removeAnimal("Lion");
+            reEnableButtons("lionbutton", '');
             break;
         case 8:
             document.getElementById("pigbox").style.display = "none";
             removeAnimal("Pig");
+            reEnableButtons("pigbutton", '');
             break;
 
     }
