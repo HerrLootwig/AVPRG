@@ -87,7 +87,7 @@ def initCalibration(animal,frame):
             print(roi[y,x][0])
             sSum = sSum + roi[y,x][1]
             vSum = vSum + roi[y,x][2]
-    h = hSum/len(hsv)
+    h = hSum/len(hsv) # ist HSV hier richtig? Oder müsste das roi sein? ist Hsv nicht größer?
     s = sSum/len(hsv)
     v = vSum/len(hsv)
     average = [int(h),int(s),int(v)]
