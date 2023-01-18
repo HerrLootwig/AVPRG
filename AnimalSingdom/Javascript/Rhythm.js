@@ -1,4 +1,3 @@
-let animals = [false, false, false, false] // wird das für irgendwas gebraucht???
 
 if (navigator.requestMIDIAccess) {
     navigator.requestMIDIAccess({ sysex: false }).then(function (midiAccess) {
@@ -13,22 +12,18 @@ if (navigator.requestMIDIAccess) {
 }
 
 function onMididMessage(event) {
-    console.log("Nachricht erhalten: " + event.data);
+    // console.log("Nachricht erhalten: " + event.data);
     switch (event.data[2]) {
         case 1:
-            animals[0] = true;
             document.getElementById("horsebox").style.display = "block";
             break;
         case 2:
-            animals[1] = true;
             document.getElementById("elephantbox").style.display = "block";
             break;
         case 3:
-            animals[2] = true;
             document.getElementById("lionbox").style.display = "block";
             break;
         case 4:
-            animals[3] = true;
             document.getElementById("pigbox").style.display = "block";
             break;
         case 5:
@@ -55,10 +50,6 @@ function onMididMessage(event) {
     }
 }
 
-function sendMessage(midiAccess, portID, msg) {
-    const output = midiAccess.outputs.get(portID);
-    output.send(msg);
-}
 
 let context = new AudioContext();
 let convolver = context.createConvolver();
@@ -84,8 +75,6 @@ function removeAnimal(animal) {
 }
 
 setInitialSounds();
-console.log(audioBuffers);
-console.log(animalBuffers);
 
 document.getElementById("horsebox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
@@ -114,7 +103,6 @@ function loadImpulseResponse(name) {
 }
 
 function playSound(buffer, time, gainValue) {
-    console.log(buffer);
     let source = context.createBufferSource();
     let gain = context.createGain();
     let stereoPanner = context.createStereoPanner();
@@ -124,7 +112,6 @@ function playSound(buffer, time, gainValue) {
     stereoPanner.pan.value=0;
 
     if (convolverActive) {
-        console.log(convolver)
         source.connect(gain)
         gain.connect(stereoPanner);
         stereoPanner.connect(convolver);
@@ -145,7 +132,6 @@ function playBeat() {
     let startTime = context.currentTime;
 
     let time = startTime //+ ( 8 * eighthNoteTime);
-    console.log(audioBuffers);
     for (i = 0; i < audioBuffers.length; i++) {
         playSound(audioBuffers[i], time + i * eighthNoteTime, 1)
     }
@@ -175,7 +161,6 @@ function addAnimalSound(name, pos, gain) {
             animalBuffers[pos].sound = audioBuffer;
             animalBuffers[pos].animal = name;
             animalBuffers[pos].gain = gain;
-            console.log(animalBuffers);
         })
         .catch(console.error);
 }
@@ -184,14 +169,12 @@ function updateAnimalGain(animalname, newGain) {
     for (let i = 0; i < animalBuffers.length; i++) {
         if (animalBuffers[i].animal == animalname) {
             animalBuffers[i].gain = newGain;
-            console.log(animalBuffers);
         }
     }
 }
 
 function reEnableButtons(classNumber, x) {
     const buttons = document.getElementsByClassName(classNumber);
-    console.log(buttons.length);
     for (let i = 0; i < buttons.length; i++) {
         const element = buttons[i];
         if (!(element.id == x)) {
@@ -241,7 +224,6 @@ document.querySelector("#bpmSlider").addEventListener("input", function (e) {
 
 document.querySelector("#reverbSelectList").addEventListener("change", function (e) {
     let name = e.target.options[e.target.selectedIndex].value;
-    console.log(name);
     loadImpulseResponse(name);
 });
 
