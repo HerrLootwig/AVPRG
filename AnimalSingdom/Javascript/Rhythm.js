@@ -17,7 +17,7 @@ function onMididMessage(event) {
     switch (event.data[2]) {
         case 1:
             animals[0] = true;
-            document.getElementById("catbox").style.display = "block";
+            document.getElementById("horsebox").style.display = "block";
             break;
         case 2:
             animals[1] = true;
@@ -32,16 +32,20 @@ function onMididMessage(event) {
             document.getElementById("pigbox").style.display = "block";
             break;
         case 5:
-            document.getElementById("catbox").style.display = "none";
+            document.getElementById("horsebox").style.display = "none";
+            removeAnimal("Horse");
             break;
         case 6:
             document.getElementById("elephantbox").style.display = "none";
+            removeAnimal("Elephant");
             break;
         case 7:
             document.getElementById("lionbox").style.display = "none";
+            removeAnimal("Lion");
             break;
         case 8:
             document.getElementById("pigbox").style.display = "none";
+            removeAnimal("Pig");
             break;
 
     }
@@ -67,12 +71,19 @@ function setInitialSounds() {
         animalBuffers[i] = { sound: null, gain: null, animal: null };
     }
 }
+function removeAnimal(animal) {
+    for (let i = 0; i < 8; i++) {
+        if (animalBuffers[i].animal == animal){
+            animalBuffers[i] = { sound: null, gain: null, animal: null };
+        }
+    }
+}
 
 setInitialSounds();
 console.log(audioBuffers);
 console.log(animalBuffers);
 
-document.getElementById("catbox").style.display = "none";
+document.getElementById("horsebox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
@@ -213,16 +224,6 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
 
 });
 
-//Kalibrierung
-
-document.querySelector('#calibrationButton').addEventListener("click", function (e) {
-    navigator.requestMIDIAccess().then((midiAccess) => {
-        //const outputs = midiAccess.outputs.values();
-        const outputs = Array.from(midiAccess.outputs.values());
-        console.log(outputs)
-        sendMessage(midiAccess, "output-1", [[0x90, 0x3C, 0x80]])
-    })
-})
 
 // bpm slider
 
@@ -492,8 +493,69 @@ document.querySelector("#bongobutton8").addEventListener("click", function (e) {
 
 // ------------------------------------Tiere-----------------------------------------------
 
-//Katze
+//Pferd
+document.querySelector("#horseGainSlider").addEventListener("input", function (e) {
+    let gainValue = (this.value / 100);
+    document.querySelector("#gainHorseOutput").innerHTML = this.value + "%";
+    updateAnimalGain("Horse", gainValue);
 
+});
+
+document.querySelector("#horsebutton1").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 0, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat1", "horsebutton1");
+});
+
+document.querySelector("#horsebutton2").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 1, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat2", "horsebutton2");
+});
+
+document.querySelector("#horsebutton3").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 2, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat3", "horsebutton3");
+});
+
+document.querySelector("#horsebutton4").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 3, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat4", "horsebutton4");
+});
+
+document.querySelector("#horsebutton5").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 4, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat5", "horsebutton5");
+});
+
+document.querySelector("#horsebutton6").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 5, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat6", "horsebutton6");
+});
+
+document.querySelector("#horsebutton7").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 6, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat7", "horsebutton7");
+});
+
+document.querySelector("#horsebutton8").addEventListener("click", function (e) {
+    gainValue = document.querySelector("#horseGainSlider").value / 100;
+    addAnimalSound("Horse", 7, gainValue);
+    e.target.disabled = true;
+    reEnableButtons("animalbeat8", "horsebutton8");
+});
 
 
 //Elefant
