@@ -13,25 +13,32 @@ midiOutput = mido.open_output("LoopBe Internal MIDI 1")
 calibrate = True
 
 #Initialisierung der Hue- und Saturation-Werte
-elephantH = 0#34
-elephantS = 0#25
+elephantR = 0#34
+elephantG = 0#25
+elephantB = 0
+elephantPixel = [0,0,0]
 
-lionH = 0#24
-lionS = 0#148
+lionR = 0#24
+lionG = 0#148
+lionB = 0
+lionPixel = [0,0,0]
 
-pigH = 0#16
-pigS = 0#64
+pigR = 0#16
+pigG = 0#64
+pigB = 0
+pigPixel = [0,0,0]
 
-horseH = 0#80#36
-horseS = 0#80#63
-horseV = 0
+horseR = 0#80#36
+horseG = 0#80#63
+horseB = 0
+horsePixel = [0,0,0]
 
 #Videofenster
 windowName = "Video"
 cv2.namedWindow(windowName)
 
 #Zeithilfen für die Kalibrierung 
-countdown = 10
+countdown = 5
 wait = 30 #30 frames = 1 sek
 
 #Bool-Werte für die Kalibrierung
@@ -77,16 +84,15 @@ def putText(text,img,pos):
 #frame: Bild des Tieres
 def initCalibration(animal,frame):
 
-    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    pixel = [240,320] #Mittleres Pixel 
+    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    #pixel = [240,320] #Mittleres Pixel 
     #roi = hsv[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10] #Bildauschnitt von Interesse (Dargestellt im Video durch ein Kreuz)
     #hSum = 0
     #sSum = 0
     #vSum = 0
 
 
-    roi = hsv[pixel[0], pixel[1]] #Bildauschnitt
-
+    average = frame[240,320] #Bildauschnitt
     #Berechnung des Durchschnitts:
     #for x in range(20):
     #    for y in range(20):
@@ -97,41 +103,31 @@ def initCalibration(animal,frame):
     #h = hSum/(20*20)
     #s = sSum/(20*20)
     #v = vSum/(20*20)
-    h = roi[0]
-    s = roi[1]
-    v = roi[2]
-    average = [int(h),int(s),int(v)]
-    print(average)
+    #g = roi[0]
+    #b = roi[1]
+    #r = roi[2]
+    #average = [g,b,r]
+    #print(average)
 
     #Zuweisung der Werte, je nachdem welches Tier kalibriert wird:
     if(animal == 1):
-        global lionH
-        global lionS
-        lionH = average[0]
-        lionS = average[1]
+        global lionPixel
+        lionPixel = np.array([average[0],average[1],average[2]])
     elif(animal == 2):
-        global elephantH
-        global elephantS
-        elephantH = average[0]
-        elephantS = average[1]
+        global elephantPixel
+        elephantPixel = np.array([average[0],average[1],average[2]])
     elif(animal == 3):
-        global pigH
-        global pigS
-        pigH = average[0]
-        pigS = average[1]
+        global pigPixel
+        pigPixel = np.array([average[0],average[1],average[2]])
     elif(animal == 4):
-        global horseH
-        global horseS
-        global horseV
-        horseS = average[0]
-        horseH = average[1]
-        horseV = average[2]
+        global horsePixel
+        horsePixel = np.array([average[0],average[1],average[2]])
 
     #Bereitstellung des Farbwerts als Array zur weiteren Verwendung:
     pixel = np.zeros((1,1,3), np.uint8)
-    pixel = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)
+    #pixel = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)
     pixel[0,0] = average
-    pixel = cv2.cvtColor(pixel, cv2.COLOR_HSV2BGR)
+    #pixel = cv2.cvtColor(pixel, cv2.COLOR_HSV2BGR)
 
     #frame[(pixel[0]-10):(pixel[0]+10), (pixel[1]-10):(pixel[1]+10)] = [0,0,255]
     
@@ -169,14 +165,16 @@ def sendMessage(controller,value):
 def lookForElephant(frame):
     
     #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
-    threshold = 5
-    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    h,s,v = cv2.split(hsv)
-    huemask = cv2.inRange(h, elephantH - threshold, elephantH + threshold)
-    satmask = cv2.inRange(s, elephantS - threshold, elephantS + threshold)
+    threshold = 10
+    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    b,g,r = cv2.split(frame)
+    bMask = cv2.inRange(b, int(elephantPixel[0] - threshold), int(elephantPixel[0] + threshold))
+    gMask = cv2.inRange(g, int(elephantPixel[1] - threshold), int(elephantPixel[1] + threshold))
+    rMask = cv2.inRange(r, int(elephantPixel[2] - threshold), int(elephantPixel[2] + threshold))
 
-    mask = huemask
-    cv2.bitwise_and(huemask,satmask,mask)
+    mask = cv2.bitwise_and(bMask,gMask)
+    mask = cv2.bitwise_and(mask,rMask)
+    
 
     #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 5000):
@@ -195,17 +193,18 @@ def lookForElephant(frame):
 def lookForLion(frame):
 
     #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
-    threshold = 5
-    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    h,s,v = cv2.split(hsv)
-    huemask = cv2.inRange(h, lionH - threshold, lionH + threshold)
-    satmask = cv2.inRange(s, lionS - threshold, lionS + threshold)
+    threshold = 10
+    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    b,g,r = cv2.split(frame)
+    bMask = cv2.inRange(b, int(lionPixel[0] - threshold), int(lionPixel[0] + threshold))
+    gMask = cv2.inRange(g, int(lionPixel[1] - threshold), int(lionPixel[1] + threshold))
+    rMask = cv2.inRange(r, int(lionPixel[2] - threshold), int(lionPixel[2] + threshold))
 
-    mask = huemask
-    cv2.bitwise_and(huemask,satmask,mask)
+    mask = cv2.bitwise_and(bMask,gMask)
+    mask = cv2.bitwise_and(mask,rMask)
 
     #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
-    if(np.sum(mask == 255) > 5000):
+    if(np.sum(mask == 255) > 2000):
         controller = 1
         value = 3
         sendMessage(controller,value)
@@ -221,17 +220,18 @@ def lookForLion(frame):
 def lookForPig(frame):
 
     #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
-    threshold = 5
-    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    h,s,v = cv2.split(hsv)
-    huemask = cv2.inRange(h, pigH - threshold, pigH + threshold)
-    satmask = cv2.inRange(s, pigS - threshold, pigS + threshold)
+    threshold = 10
+    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    b,g,r = cv2.split(frame)
+    bMask = cv2.inRange(b, int(pigPixel[0] - threshold), int(pigPixel[0] + threshold))
+    gMask = cv2.inRange(g, int(pigPixel[1] - threshold), int(pigPixel[1] + threshold))
+    rMask = cv2.inRange(r, int(pigPixel[2] - threshold), int(pigPixel[2] + threshold))
 
-    mask = huemask
-    cv2.bitwise_and(huemask,satmask,mask)
+    mask = cv2.bitwise_and(bMask,gMask)
+    mask = cv2.bitwise_and(mask,rMask)
 
     #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
-    if(np.sum(mask == 255) > 5000):
+    if(np.sum(mask == 255) > 2000):
         controller = 1
         value = 4
         sendMessage(controller,value)
@@ -248,15 +248,14 @@ def lookForHorse(frame):
 
     #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
     threshold = 10
-    hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    h,s,v = cv2.split(hsv)
-    huemask = cv2.inRange(h, horseH - threshold, horseH + threshold)
-    satmask = cv2.inRange(s, horseS - threshold, horseS + threshold)
-    valmask = cv2.inRange(v, horseV - threshold, horseV + threshold)
-
-    mask = huemask
-    cv2.bitwise_and(huemask,satmask,mask)
-    cv2.bitwise_and(mask,valmask,mask)
+    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
+    b,g,r = cv2.split(frame)
+    bMask = cv2.inRange(b, int(horsePixel[0] - threshold), int(horsePixel[0] + threshold))
+    gMask = cv2.inRange(g, int(horsePixel[1] - threshold), int(horsePixel[1] + threshold))
+    rMask = cv2.inRange(r, int(horsePixel[2] - threshold), int(horsePixel[2] + threshold))
+    
+    mask = cv2.bitwise_and(bMask,gMask)
+    mask = cv2.bitwise_and(mask,rMask)
 
     #Entscheidung, ob Tier auf Website aktiviert oder deaktiviert werden soll
     if(np.sum(mask == 255) > 5000):
@@ -288,13 +287,13 @@ def putCurser(frame):
 while cap.isOpened():
 
     ret, frame = cap.read()
-    frame = cv2.medianBlur(frame,51)
 
     #Ablauf der Kalibrierung
     if(calibrate):
 
         #Anzeigekopie, auf der Text, Kreuz und Screencap dargestellt werden, da das Original für die Farbwerte gebraucht wird
         visual = frame.copy()
+        frame = cv2.medianBlur(frame,51)
 
         #Kreuz wird in Bildmitte gezeichnet
         putCurser(visual)
@@ -326,38 +325,33 @@ while cap.isOpened():
         #Abarbeitung der einzelnen Kalibrierungschritte
         if(countdown <= 0 and not calBack): #Hintergrund
             calBack = True
-            countdown = 10
+            countdown = 5
             background = frame.copy()
             visual[:] = [255,255,255]
-            print("Blitz!")
         elif(countdown <= 0 and not calLion): #Löwe
             color = initCalibration(1,frame)
             calLion = True
-            countdown = 10
+            countdown = 5
             screencap[:] = color 
             visual[:] = [255,255,255]
-            print("Blitz!")
         elif(countdown <= 0 and not calElephant): #Elefant
             color = initCalibration(2,frame)
             calElephant = True
-            countdown = 10
+            countdown = 5
             screencap[:] = color 
             visual[:] = [255,255,255]
-            print("Blitz!")
         elif(countdown <= 0 and not calPig): #Schwein
             color = initCalibration(3,frame)
             calPig = True
-            countdown = 10
+            countdown = 5
             screencap[:] = color 
             visual[:] = [255,255,255]
-            print("Blitz!")
         elif(countdown <= 0 and not calHorse): #Pferd
             color = initCalibration(4,frame)
             calHorse = True
             screencap[:] = color 
             copy = visual.copy()
             visual[:] = [255,255,255]
-            print("Blitz!")
 
         #30 Frames abwarten um Countdown einen Schritt runterzuzählen
         if(wait <= 0):
@@ -371,21 +365,21 @@ while cap.isOpened():
     #Hauptteil des Programms - Tiere werden gescucht
     else:
 
+        copy = cv2.medianBlur(frame,51)
         #Hintergrund entfernen
         #bs = backgroundSubstraction(frame,background)
-        bs = frame
         #Nach Tieren suchen
-        maskHorse = lookForHorse(bs)
-        maskPig = lookForPig(bs)
-        maskElephant = lookForElephant(bs)
-        maskLion = lookForLion(bs)
+        maskHorse = lookForHorse(copy)
+        maskPig = lookForPig(copy)
+        maskElephant = lookForElephant(copy)
+        maskLion = lookForLion(copy)
 
         #Alle Tiermasken kombinieren
         mask = maskElephant + maskHorse + maskLion + maskPig
 
         #Anzeigen und Texteinblendung
         putText("Zeigen Sie ihre Tiere!", frame,(10,50))
-        cv2.imshow("Test",mask)
+        #cv2.imshow("Test",mask)
         cv2.imshow(windowName,frame)
 
     #Mit Tastendruck Programm beenden
