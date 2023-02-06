@@ -12,25 +12,10 @@ midiOutput = mido.open_output("LoopBe Internal MIDI 1")
 #Programm mit Kalibrierung starten?
 calibrate = True
 
-#Initialisierung der Hue- und Saturation-Werte
-elephantR = 0#34
-elephantG = 0#25
-elephantB = 0
+#Initialisierung der RGB-Werte
 elephantPixel = [0,0,0]
-
-lionR = 0#24
-lionG = 0#148
-lionB = 0
 lionPixel = [0,0,0]
-
-pigR = 0#16
-pigG = 0#64
-pigB = 0
 pigPixel = [0,0,0]
-
-horseR = 0#80#36
-horseG = 0#80#63
-horseB = 0
 horsePixel = [0,0,0]
 
 #Videofenster
@@ -54,9 +39,6 @@ area = [480,640]
 #Initialisierung der Darstellung der kalibrierten Pixelfarbe im Video
 screencap = np.zeros((100,100,3), np.uint8)
 
-frameWidth = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-frameHeight = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-
 #Diese Funktion stellt einen Text in der Video-Ausgabe dar.
 #text: Datzustellender Text
 #img: Bild, auf dem der Text dargestellt werden soll
@@ -78,58 +60,30 @@ def putText(text,img,pos):
         thickness,
         lineType)
 
-#Diese Funktion merkt sich die Pixelfarben eines Bereiches in der Bildmitte und berechnet deren durchschnittlichen Farbwert, 
-#um die Hue- und Saturation-Werte für das spätere Erkennen eines Tieres zu speichern.
+#Diese Funktion merkt sich die Pixelfarben in der Bildmitte und speichert diese RGB-Werte.
 #animal: Welches Tier wird gerade kalibriert?
 #frame: Bild des Tieres
 def initCalibration(animal,frame):
 
-    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
-    #pixel = [240,320] #Mittleres Pixel 
-    #roi = hsv[pixel[0]-10:pixel[0]+10, pixel[1]-10:pixel[1]+10] #Bildauschnitt von Interesse (Dargestellt im Video durch ein Kreuz)
-    #hSum = 0
-    #sSum = 0
-    #vSum = 0
-
-
-    average = frame[240,320] #Bildauschnitt
-    #Berechnung des Durchschnitts:
-    #for x in range(20):
-    #    for y in range(20):
-    #        hSum = hSum + roi[y,x][0]
-    #        print(roi[y,x][0])
-   #         sSum = sSum + roi[y,x][1]
-    #        vSum = vSum + roi[y,x][2]
-    #h = hSum/(20*20)
-    #s = sSum/(20*20)
-    #v = vSum/(20*20)
-    #g = roi[0]
-    #b = roi[1]
-    #r = roi[2]
-    #average = [g,b,r]
-    #print(average)
+    center = frame[240,320] #Bildauschnitt
 
     #Zuweisung der Werte, je nachdem welches Tier kalibriert wird:
     if(animal == 1):
         global lionPixel
-        lionPixel = np.array([average[0],average[1],average[2]])
+        lionPixel = np.array([center[0],center[1],center[2]])
     elif(animal == 2):
         global elephantPixel
-        elephantPixel = np.array([average[0],average[1],average[2]])
+        elephantPixel = np.array([center[0],center[1],center[2]])
     elif(animal == 3):
         global pigPixel
-        pigPixel = np.array([average[0],average[1],average[2]])
+        pigPixel = np.array([center[0],center[1],center[2]])
     elif(animal == 4):
         global horsePixel
-        horsePixel = np.array([average[0],average[1],average[2]])
+        horsePixel = np.array([center[0],center[1],center[2]])
 
     #Bereitstellung des Farbwerts als Array zur weiteren Verwendung:
     pixel = np.zeros((1,1,3), np.uint8)
-    #pixel = cv2.cvtColor(pixel, cv2.COLOR_BGR2HSV)
-    pixel[0,0] = average
-    #pixel = cv2.cvtColor(pixel, cv2.COLOR_HSV2BGR)
-
-    #frame[(pixel[0]-10):(pixel[0]+10), (pixel[1]-10):(pixel[1]+10)] = [0,0,255]
+    pixel[0,0] = center
     
     return pixel
 
@@ -164,9 +118,8 @@ def sendMessage(controller,value):
 #frame: Aktuelles Kamerabild
 def lookForElephant(frame):
     
-    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
+    #Erstellen der Masken
     threshold = 10
-    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     b,g,r = cv2.split(frame)
     bMask = cv2.inRange(b, int(elephantPixel[0] - threshold), int(elephantPixel[0] + threshold))
     gMask = cv2.inRange(g, int(elephantPixel[1] - threshold), int(elephantPixel[1] + threshold))
@@ -192,9 +145,8 @@ def lookForElephant(frame):
 #frame: Aktuelles Kamerabild
 def lookForLion(frame):
 
-    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
+    #Erstellen der Masken
     threshold = 10
-    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     b,g,r = cv2.split(frame)
     bMask = cv2.inRange(b, int(lionPixel[0] - threshold), int(lionPixel[0] + threshold))
     gMask = cv2.inRange(g, int(lionPixel[1] - threshold), int(lionPixel[1] + threshold))
@@ -219,9 +171,8 @@ def lookForLion(frame):
 #frame: Aktuelles Kamerabild
 def lookForPig(frame):
 
-    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
+    #Erstellen der Masken
     threshold = 10
-    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     b,g,r = cv2.split(frame)
     bMask = cv2.inRange(b, int(pigPixel[0] - threshold), int(pigPixel[0] + threshold))
     gMask = cv2.inRange(g, int(pigPixel[1] - threshold), int(pigPixel[1] + threshold))
@@ -246,9 +197,8 @@ def lookForPig(frame):
 #frame: Aktuelles Kamerabild
 def lookForHorse(frame):
 
-    #Konvertierung der BGR-Farben in HSV und Erstellen der Masken
+    #Erstellen der Masken
     threshold = 10
-    #hsv = cv2.cvtColor(frame,cv2.COLOR_BGR2HSV)
     b,g,r = cv2.split(frame)
     bMask = cv2.inRange(b, int(horsePixel[0] - threshold), int(horsePixel[0] + threshold))
     gMask = cv2.inRange(g, int(horsePixel[1] - threshold), int(horsePixel[1] + threshold))
@@ -271,7 +221,7 @@ def lookForHorse(frame):
 
 #Diese Funktion zeichnet ein Kreuz in der Mitte des Kamerabildes, um den Benutzer beim Kalibrieren zu helfen.
 #frame: aktuelles Kamerabild
-def putCurser(frame):
+def putCursor(frame):
     center = [240, 320] #Mittelpunkt  des Bildes und des Kreuzes
     #Kreuz zeichnen:
     for x in range(center[1] -10, center[1] + 10):
@@ -296,7 +246,7 @@ while cap.isOpened():
         frame = cv2.medianBlur(frame,51)
 
         #Kreuz wird in Bildmitte gezeichnet
-        putCurser(visual)
+        putCursor(visual)
 
         #Screencap (zuletzt kalibrierte Pixelfarbe) wird unten rechts angezeigt
         visual[area[0]-100:area[0]+100, area[1]-100:area[1]+100] = screencap
@@ -366,8 +316,10 @@ while cap.isOpened():
     else:
 
         copy = cv2.medianBlur(frame,51)
+
         #Hintergrund entfernen
         #bs = backgroundSubstraction(frame,background)
+
         #Nach Tieren suchen
         maskHorse = lookForHorse(copy)
         maskPig = lookForPig(copy)
