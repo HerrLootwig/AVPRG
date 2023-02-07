@@ -105,22 +105,18 @@ function loadImpulseResponse(name) {
 function playSound(buffer, time, gainValue) {
     let source = context.createBufferSource();
     let gain = context.createGain();
-    let stereoPanner = context.createStereoPanner();
 
     source.buffer = buffer;
     gain.gain.value = gainValue;
-    stereoPanner.pan.value=0;
 
     if (convolverActive) {
         source.connect(gain)
-        gain.connect(stereoPanner);
-        stereoPanner.connect(convolver);
+        gain.connect(convolver);
         convolver.connect(context.destination);
 
     } else {
         source.connect(gain)
-        gain.connect(stereoPanner);
-        stereoPanner.connect(context.destination);
+        gain.connect(context.destination);
     }
 
     source.start(time);
