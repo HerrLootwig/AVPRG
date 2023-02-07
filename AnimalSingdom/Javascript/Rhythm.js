@@ -15,77 +15,93 @@ function onMididMessage(event) {
     // console.log("Nachricht erhalten: " + event.data);
     switch (event.data[2]) {
         case 1:
+            // der Block mit dem Pferd wird vollständig eingeblendet
             document.getElementById("horsebox").style.display = "block";
             break;
         case 2:
+            // der Block mit dem Elefanten wird vollständig eingeblendet
             document.getElementById("elephantbox").style.display = "block";
             break;
         case 3:
+            // der Block mit dem Löwen wird vollständig eingeblendet
             document.getElementById("lionbox").style.display = "block";
             break;
         case 4:
+            // der Block mit dem Schwein wird vollständig eingeblendet
             document.getElementById("pigbox").style.display = "block";
             break;
         case 5:
+            // der Block mit dem Pferd wird ausgeblendet, einzig der Name bleibt sichtbar
             document.getElementById("horsebox").style.display = "none";
-            removeAnimal("Horse");
-            reEnableButtons("horsebutton", '');
+            removeAnimal("Horse"); // das Pferd wird aus dem Beat entfernt
+            reEnableButtons("horsebutton", ''); // alle 8 Buttons unter werden enabled
             break;
         case 6:
+             // der Block mit dem Elefanten wird ausgeblendet, einzig der Name bleibt sichtbar
             document.getElementById("elephantbox").style.display = "none";
-            removeAnimal("Elephant");
-            reEnableButtons("elephantbutton", '');
+            removeAnimal("Elephant"); // der Elefant wird aus dem Beat entfernt
+            reEnableButtons("elephantbutton", ''); // alle 8 Buttons unter Elefant werden enabled
             break;
         case 7:
+             // der Block mit dem Löwen wird ausgeblendet, einzig der Name bleibt sichtbar
             document.getElementById("lionbox").style.display = "none";
-            removeAnimal("Lion");
-            reEnableButtons("lionbutton", '');
+            removeAnimal("Lion"); // der Löwe wird aus dem Beat entfernt
+            reEnableButtons("lionbutton", ''); // alle 8 Buttons unter Löwe werden enabled
             break;
         case 8:
+             // der Block mit dem Schwein wird ausgeblendet, einzig der Name bleibt sichtbar
             document.getElementById("pigbox").style.display = "none";
-            removeAnimal("Pig");
-            reEnableButtons("pigbutton", '');
+            removeAnimal("Pig"); // das Schwein wird aus dem Beat entfernt
+            reEnableButtons("pigbutton", ''); // alle 8 Buttons unter Schwein werden enabled
             break;
 
     }
 }
 
 
-let context = new AudioContext();
-let convolver = context.createConvolver();
-let convolverActive = false;
-var audioBuffers = [];
-var animalBuffers = []
-let isPlaying = false;
-let tempo = 90;
+let context = new AudioContext(); // da der audioContext für alles derselbe ist
+let convolver = context.createConvolver(); // Convolver ebenfalls für alle sounds einheitlich
+let convolverActive = false; // merkt sich, ob der User gerade den Convolver eingestellt hat
+var audioBuffers = []; // Array für die Grundbeatelemente
+var animalBuffers = [] // Array für die Tierstimmen
+let isPlaying = false; // merkt sich, ob der beat schon abgespielt wird
+let tempo = 90; // festlegung der default bpm
 
+// das Array wir initial und beim zurücksetzen mit NULL-Werten gefüllt
 function setInitialSounds() {
     convolverActive = false;
     for (let i = 0; i < 8; i++) {
+        // bei Grundbeat wird nur der Sound abgespeichert
         audioBuffers[i] = null;
+        // bei den Tieren wird zusätzlich der gainwert des Sliders und die bezeichnung des Tiers gespeichert
         animalBuffers[i] = { sound: null, gain: null, animal: null };
     }
 }
+
+// hiermit kann ein bestimmtes Tier aus dem Array mit den Tierstimmen entfernt werden
+// Übergeben: Tiername als String
 function removeAnimal(animal) {
     for (let i = 0; i < 8; i++) {
-        if (animalBuffers[i].animal == animal){
-            animalBuffers[i] = { sound: null, gain: null, animal: null };
+        if (animalBuffers[i].animal == animal){ // Überall wo das gesuchte Tier vorkommt
+            animalBuffers[i] = { sound: null, gain: null, animal: null }; // werden die werte mit null überschrieben
         }
     }
 }
 
-setInitialSounds();
+setInitialSounds(); // Arrays werden initial mit null gefüllt
 
+// die Tierboxen werden, bis auf den Namen initial ausgeblendet
 document.getElementById("horsebox").style.display = "none";
 document.getElementById("elephantbox").style.display = "none";
 document.getElementById("lionbox").style.display = "none";
 document.getElementById("pigbox").style.display = "none";
 
+// ImpulseResponse für Convolver wird geladen
 function loadImpulseResponse(name) {
-    if (name == "none") {
+    if (name == "none") {  // Wenn "none" ausgewählt ist, wird der Convolver disconnected und deaktiviert
         convolver.disconnect();
         convolverActive = false;
-    } else {
+    } else { // sonst wird die dem namen zugehörige ImpulseResponse geladen
         fetch("/Javascript/impulseResponses/" + name + ".wav")
             .then(response => response.arrayBuffer())
             .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
@@ -102,6 +118,7 @@ function loadImpulseResponse(name) {
     }
 }
 
+// Abspielen eines einzelnen Sounds, buffer, startzeit und Lautstärkewert wird übergeben
 function playSound(buffer, time, gainValue) {
     let source = context.createBufferSource();
     let gain = context.createGain();
@@ -109,83 +126,102 @@ function playSound(buffer, time, gainValue) {
     source.buffer = buffer;
     gain.gain.value = gainValue;
 
-    if (convolverActive) {
+    if (convolverActive) { // ist der Convolver aktiv, wird er mit verbunden
         source.connect(gain)
         gain.connect(convolver);
         convolver.connect(context.destination);
 
-    } else {
+    } else { // sonst wird nur die Quelle mit dem Gain und der destinationverbunden
         source.connect(gain)
         gain.connect(context.destination);
     }
 
-    source.start(time);
+    source.start(time); // der Sound wird erst zum vorgegebenen Zeitpunkt gestartet
 }
 
+// Spielt den Beat ab, indem nacheinander die Sounds abgespielt werden
 function playBeat() {
     // tempo = bpm
-    let eighthNoteTime = (60 / tempo) / 2;
-    let startTime = context.currentTime;
+    let eighthNoteTime = (60 / tempo) / 2; // Achtelnotenzeit
+    let startTime = context.currentTime; // startzeit
 
-    let time = startTime //+ ( 8 * eighthNoteTime);
-    for (i = 0; i < audioBuffers.length; i++) {
-        playSound(audioBuffers[i], time + i * eighthNoteTime, 1)
+    let time = startTime
+    for (i = 0; i < audioBuffers.length; i++) { // iteriert durch das GrundbeatArrray
+        playSound(audioBuffers[i], time + i * eighthNoteTime, 1) // gain ist immer bei default 1
     }
 
-    for (i = 0; i < animalBuffers.length; i++) {
-        playSound(animalBuffers[i].sound, time + i * eighthNoteTime, animalBuffers[i].gain)
+    for (i = 0; i < animalBuffers.length; i++) { // iteriert durch das Array mit den Tierstimmen
+        playSound(animalBuffers[i].sound, time + i * eighthNoteTime, animalBuffers[i].gain) // gain wird aus dem Array ausgelesen
     }
 
-    setTimeout(playBeat, 238000 / tempo);
+    setTimeout(playBeat, 238000 / tempo); // für einen gleichmäßigen Übergang, egal wie viele bpm gerade eingestellt sind
 }
 
+// Einen Grundsound an eine bestimmte Stelle(0 bis 7) speichern
+// name: int 1 bis 5
+// pos: int 0 bis 7
 function addSound(name, pos) {
-    fetch("/Javascript/sounds/sound" + name + ".wav")
+    fetch("/Javascript/sounds/sound" + name + ".wav") // Wav-Datei laden
         .then(response => response.arrayBuffer())
         .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
         .then(audioBuffer => {
-            audioBuffers[pos] = audioBuffer;
+            audioBuffers[pos] = audioBuffer; // an gewünschte stelle im Array speichern
         })
         .catch(console.error);
 }
 
+
+// Einen Tiersound an eine bestimmte Stelle(0 bis 7) speichern
+// name: Elephant, Horse, Lion oder Pig
+// pos: int 0 bis 7
+// gain: float 0 bis 2
 function addAnimalSound(name, pos, gain) {
-    fetch("/Javascript/sounds/sound" + name + ".wav")
+    fetch("/Javascript/sounds/sound" + name + ".wav") // Wav-Datei laden
         .then(response => response.arrayBuffer())
         .then(undecodedAudio => context.decodeAudioData(undecodedAudio))
         .then(audioBuffer => {
-            animalBuffers[pos].sound = audioBuffer;
+            animalBuffers[pos].sound = audioBuffer; 
             animalBuffers[pos].animal = name;
             animalBuffers[pos].gain = gain;
         })
         .catch(console.error);
 }
 
+// die Lautstärke eines bestimmten Tieres überall im Array aktualisieren
+// gesuchtes Tier: animalname
+// newGain: neu eingestellter gainWert: float 0-2
 function updateAnimalGain(animalname, newGain) {
     for (let i = 0; i < animalBuffers.length; i++) {
-        if (animalBuffers[i].animal == animalname) {
-            animalBuffers[i].gain = newGain;
+        if (animalBuffers[i].animal == animalname) { // überall wo der Tiername übereinstimmt
+            animalBuffers[i].gain = newGain;        // wird der Gain angepasst
         }
     }
 }
 
+// Zum zurücksetzen der Buttons wenn der Sound z.B. an Stelle 1 überschrieben wird 
+// -> alle anderen Button mit 1 des Grundbeats werden wieder enabled
+// classNumber: beat1 - beat8 oder animalbeat1 - animalbeat8 oder horsebutton, elephantbutton, lionbutton, pigbutton
+// x: der name des gerade gedrückte Button, der disabled bleiben soll
 function reEnableButtons(classNumber, x) {
     const buttons = document.getElementsByClassName(classNumber);
     for (let i = 0; i < buttons.length; i++) {
         const element = buttons[i];
-        if (!(element.id == x)) {
-            element.disabled = false;
+        if (!(element.id == x)) { // soll der Button nicht ausgespart werden?
+            element.disabled = false; // dann enablen
         }
     }
 }
 
+// bei drücken des playbutons
 document.querySelector("#playResetButton").addEventListener("click", function (e) {
     if (!isPlaying) {
-        playBeat();
-        e.target.innerHTML = "Reset Beat";
-        isPlaying = true;
-    } else {
+        playBeat(); // beat wird gestartet
+        e.target.innerHTML = "Reset Beat"; // auf dem Button steht dann reset Beat
+        isPlaying = true; // es wird sich gemerkt, dass der Beat gestartet ist
+    } else { // wenn der button erneut gedrückt wird, wird der beat zurückgesetzt:
+        // alles wird mit null überschrieben:
         setInitialSounds();
+        // alle Buttos werden wieder enabled
         reEnableButtons("beat1", '');
         reEnableButtons("beat2", '');
         reEnableButtons("beat3", '');
@@ -202,6 +238,7 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
         reEnableButtons("animalbeat6", '');
         reEnableButtons("animalbeat7", '');
         reEnableButtons("animalbeat8", '');
+        // der Convolver wird zurückgesetzt
         document.querySelector("#reverbSelectList").value = 'none';
     }
 
@@ -213,22 +250,22 @@ document.querySelector("#playResetButton").addEventListener("click", function (e
 document.querySelector("#bpmSlider").addEventListener("input", function (e) {
     let bpmValue = this.value;
     document.querySelector("#bpmOutput").innerHTML = bpmValue + " bpm";
-    tempo = bpmValue;
+    tempo = bpmValue; // die bpm werden global angepasst
 });
 
 // Reverb Selectlist
 
 document.querySelector("#reverbSelectList").addEventListener("change", function (e) {
-    let name = e.target.options[e.target.selectedIndex].value;
-    loadImpulseResponse(name);
+    let name = e.target.options[e.target.selectedIndex].value; // name der ausgewählten ImpulseResponse wird ausgelesen
+    loadImpulseResponse(name); // die enstprechende ImpulseResponse wird geladen und angewendet
 });
 
 // Klanghölzer
 
 document.querySelector("#klangholzbutton1").addEventListener("click", function (e) {
-    addSound("1", 0);
-    e.target.disabled = true;
-    reEnableButtons("beat1", "klangholzbutton1");
+    addSound("1", 0); // Sound1 wird an Stelle 0 hinzugefügt
+    e.target.disabled = true; // button wird deaktiviert und dadurch rot eingefärbt
+    reEnableButtons("beat1", "klangholzbutton1"); // alle anderen 1er buttons werden wieder aktiviert
 });
 
 document.querySelector("#klangholzbutton2").addEventListener("click", function (e) {
@@ -275,9 +312,10 @@ document.querySelector("#klangholzbutton8").addEventListener("click", function (
 // Glocke
 
 document.querySelector("#glockenbutton1").addEventListener("click", function (e) {
-    addSound("2", 0);
-    e.target.disabled = true;
-    reEnableButtons("beat1", "glockenbutton1");
+    addSound("2", 0); // Sound2 wird an Stelle 0 hinzugefügt
+    e.target.disabled = true; // button wird deaktiviert und dadurch rot eingefärbt
+    reEnableButtons("beat1", "glockenbutton1"); // alle anderen 1er buttons werden wieder aktiviert
+       
 });
 
 document.querySelector("#glockenbutton2").addEventListener("click", function (e) {
@@ -326,9 +364,9 @@ document.querySelector("#glockenbutton8").addEventListener("click", function (e)
 // Guiro
 
 document.querySelector("#guirobutton1").addEventListener("click", function (e) {
-    addSound("3", 0);
-    e.target.disabled = true;
-    reEnableButtons("beat1", "guirobutton1");
+    addSound("3", 0); // Sound3 wird an Stelle 0 hinzugefügt
+    e.target.disabled = true; // button wird deaktiviert und dadurch rot eingefärbt
+    reEnableButtons("beat1", "guirobutton1"); // alle anderen 1er buttons werden wieder aktiviert
 });
 
 document.querySelector("#guirobutton2").addEventListener("click", function (e) {
@@ -376,9 +414,9 @@ document.querySelector("#guirobutton8").addEventListener("click", function (e) {
 // Clap
 
 document.querySelector("#klatschbutton1").addEventListener("click", function (e) {
-    addSound("4", 0);
-    e.target.disabled = true;
-    reEnableButtons("beat1", "klatschbutton1");
+    addSound("4", 0);// Sound4 wird an Stelle 0 hinzugefügt
+    e.target.disabled = true; // button wird deaktiviert und dadurch rot eingefärbt
+    reEnableButtons("beat1", "klatschbutton1"); // alle anderen 1er buttons werden wieder aktiviert
 });
 
 document.querySelector("#klatschbutton2").addEventListener("click", function (e) {
@@ -426,9 +464,9 @@ document.querySelector("#klatschbutton8").addEventListener("click", function (e)
 // Bongo
 
 document.querySelector("#bongobutton1").addEventListener("click", function (e) {
-    addSound("5", 0);
-    e.target.disabled = true;
-    reEnableButtons("beat1", "bongobutton1");
+    addSound("5", 0); // Sound5 wird an Stelle 0 hinzugefügt
+    e.target.disabled = true; // button wird deaktiviert und dadurch rot eingefärbt
+    reEnableButtons("beat1", "bongobutton1"); // alle anderen 1er buttons werden wieder aktiviert
 });
 
 document.querySelector("#bongobutton2").addEventListener("click", function (e) {
@@ -476,18 +514,21 @@ document.querySelector("#bongobutton8").addEventListener("click", function (e) {
 // ------------------------------------Tiere-----------------------------------------------
 
 //Pferd
+
+// Gain Slider
 document.querySelector("#horseGainSlider").addEventListener("input", function (e) {
-    let gainValue = (this.value / 100);
-    document.querySelector("#gainHorseOutput").innerHTML = this.value + "%";
-    updateAnimalGain("Horse", gainValue);
+    let gainValue = (this.value / 100); // gain Value wird ausgelesen
+    document.querySelector("#gainHorseOutput").innerHTML = this.value + "%"; // als Wert zwischen 0 und 200% angezeigt
+    updateAnimalGain("Horse", gainValue); // gain wird für das Pferd aktualisiert
 
 });
 
+ // Buttons
 document.querySelector("#horsebutton1").addEventListener("click", function (e) {
-    gainValue = document.querySelector("#horseGainSlider").value / 100;
-    addAnimalSound("Horse", 0, gainValue);
-    e.target.disabled = true;
-    reEnableButtons("animalbeat1", "horsebutton1");
+    gainValue = document.querySelector("#horseGainSlider").value / 100;// aktuellen gain des Sliders auslesen
+    addAnimalSound("Horse", 0, gainValue); // Pferd an Stelle 0 mit diesem Gain abspeichern
+    e.target.disabled = true; // button rot färben
+    reEnableButtons("animalbeat1", "horsebutton1"); // alle anderen Buttons wieder enablen
 });
 
 document.querySelector("#horsebutton2").addEventListener("click", function (e) {
@@ -541,19 +582,21 @@ document.querySelector("#horsebutton8").addEventListener("click", function (e) {
 
 
 //Elefant
+
+// Gain Slider
 document.querySelector("#elephantGainSlider").addEventListener("input", function (e) {
-    let gainValue = (this.value / 100);
-    document.querySelector("#gainElephantOutput").innerHTML = this.value + "%";
-    updateAnimalGain("Elephant", gainValue);
+    let gainValue = (this.value / 100); // gain Value wird ausgelesen
+    document.querySelector("#gainElephantOutput").innerHTML = this.value + "%"; // als Wert zwischen 0 und 200% angezeigt
+    updateAnimalGain("Elephant", gainValue); // gain wird für den Elefanten aktualisiert
 
 });
 
-
+// Buttons
 document.querySelector("#elephantbutton1").addEventListener("click", function (e) {
-    gainValue = document.querySelector("#elephantGainSlider").value / 100;
-    addAnimalSound("Elephant", 0, gainValue);
-    e.target.disabled = true;
-    reEnableButtons("animalbeat1", "elephantbutton1");
+    gainValue = document.querySelector("#elephantGainSlider").value / 100; // aktuellen gain des Sliders auslesen
+    addAnimalSound("Elephant", 0, gainValue); // Elefant an stelle 0 mit diesem Gain abspeichern
+    e.target.disabled = true; // button rot färben
+    reEnableButtons("animalbeat1", "elephantbutton1"); // alle anderen Buttons wieder enablen
 });
 
 document.querySelector("#elephantbutton2").addEventListener("click", function (e) {
@@ -607,6 +650,7 @@ document.querySelector("#elephantbutton8").addEventListener("click", function (e
 
 //Löwe
 
+// Gain Slider
 document.querySelector("#lionGainSlider").addEventListener("input", function (e) {
     let gainValue = (this.value / 100);
     document.querySelector("#gainLionOutput").innerHTML = this.value + "%";
@@ -614,6 +658,7 @@ document.querySelector("#lionGainSlider").addEventListener("input", function (e)
 
 });
 
+// Buttons
 document.querySelector("#lionbutton1").addEventListener("click", function (e) {
     gainValue = document.querySelector("#lionGainSlider").value / 100;
     addAnimalSound("Lion", 0, gainValue);
@@ -673,6 +718,7 @@ document.querySelector("#lionbutton8").addEventListener("click", function (e) {
 
 // Schwein
 
+// Gain Slider
 document.querySelector("#pigGainSlider").addEventListener("input", function (e) {
     let gainValue = (this.value / 100);
     document.querySelector("#gainPigOutput").innerHTML = this.value + "%";
@@ -680,6 +726,7 @@ document.querySelector("#pigGainSlider").addEventListener("input", function (e) 
 
 });
 
+// Buttons
 document.querySelector("#pigbutton1").addEventListener("click", function (e) {
     gainValue = document.querySelector("#pigGainSlider").value / 100;
     addAnimalSound("Pig", 0, gainValue);
